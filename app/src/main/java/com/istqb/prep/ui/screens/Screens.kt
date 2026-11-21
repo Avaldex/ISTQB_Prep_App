@@ -86,6 +86,10 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 
 private data class UiStrings(
     val isEn: Boolean,
@@ -644,6 +648,10 @@ fun IstqbAppRoot(
                                 module = module,
                                 allQuestions = viewModel.db.questions,
                                 recordToStats = recordTopicAnswersToStats,
+
+                                eInkFontSize = viewModel.eInkFontSize,
+                                onEInkFontSizeChange = viewModel::updateEInkFontSize,
+
                                 onToggleRecordToStats = { recordTopicAnswersToStats = it },
                                 onRecordAnswer = { qId, isRight ->
                                     if (recordTopicAnswersToStats) {
@@ -1010,10 +1018,17 @@ private fun ModuleDetailScreen(
     onToggleRecordToStats: (Boolean) -> Unit,
     onRecordAnswer: (Int, Boolean) -> Unit,
     isEInk: Boolean,
+
+    eInkFontSize: Int,
+    onEInkFontSizeChange: (Int) -> Unit,
+
     isTablet: Boolean,
     onStartPractice: () -> Unit,
     onStartChapterTest: () -> Unit
 ) {
+
+
+
     val horizontalPad = if (isTablet) 28.dp else 16.dp
     val topicQuestions = remember(key1 = module.id, key2 = allQuestions) {
         val sameSource = allQuestions.filter { it.source == module.source }
@@ -1048,13 +1063,71 @@ private fun ModuleDetailScreen(
         )
 
         StyledCard(isEInk = isEInk) {
-            Text(
-                text = strings.theoryHeader,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            if (isEInk) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedButton(
 
+
+                        onClick = {
+                            onEInkFontSizeChange(
+                                (eInkFontSize - 1).coerceAtLeast(14)
+                            )
+                        },
+
+                        enabled = eInkFontSize > 14,
+                        modifier = Modifier.size(52.dp, 28.dp),
+                        shape = RoundedCornerShape(50),
+                        border = BorderStroke(1.dp, Color.Black),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text("A−", fontSize = 13.sp, color = Color.Black)
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Text(
+                        text = "$eInkFontSize sp",
+                        fontSize = 14.sp,
+                        color = Color.Black
+                    )
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    OutlinedButton(
+
+
+
+                        onClick = {
+                            onEInkFontSizeChange(
+                                (eInkFontSize + 1).coerceAtMost(24)
+                            )
+                        },
+
+
+                        enabled = eInkFontSize < 24,
+                        modifier = Modifier.size(52.dp, 28.dp),
+                        shape = RoundedCornerShape(50),
+                        border = BorderStroke(1.dp, Color.Black),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text("A+", fontSize = 13.sp, color = Color.Black)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+            } else {
+                Text(
+                    text = strings.theoryHeader,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             val theoryParts = remember(module.theory) {
                 val normalized = module.theory.replace("\r\n", "\n")
@@ -1094,8 +1167,8 @@ private fun ModuleDetailScreen(
             val theoryStyle = if (isEInk) {
                 MaterialTheme.typography.bodyLarge.copy(
                     fontFamily = FontFamily.Serif,
-                    fontSize = 16.sp,
-                    lineHeight = 24.sp
+                    fontSize = eInkFontSize.sp,
+                    lineHeight = (eInkFontSize * 1.5f).sp
                 )
             } else {
                 MaterialTheme.typography.bodyLarge

@@ -7,6 +7,18 @@ class IstqbRepository(context: Context) {
     private val prefs: SharedPreferences =
         context.getSharedPreferences("istqb_prep_stats_v1", Context.MODE_PRIVATE)
 
+    fun loadEInkFontSize(): Int {
+        return prefs.getInt("eink_font_size", 18)
+            .coerceIn(14, 24)
+    }
+
+    fun saveEInkFontSize(size: Int) {
+        prefs.edit()
+            .putInt("eink_font_size", size.coerceIn(14, 24))
+            .apply()
+    }
+
+
     fun loadDatabase(lang: String = "RU"): SyllabusDatabase {
         val normalizedLang = lang.trim().uppercase()
         val allModules = buildSyllabusModules() + buildSyllabusModulesRu()

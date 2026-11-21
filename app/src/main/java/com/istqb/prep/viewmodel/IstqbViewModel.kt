@@ -10,6 +10,19 @@ import com.istqb.prep.data.*
 class IstqbViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = IstqbRepository(application.applicationContext)
 
+    var eInkFontSize by mutableStateOf(
+        repository.loadEInkFontSize()
+    )
+        private set
+
+    fun updateEInkFontSize(size: Int) {
+        val newSize = size.coerceIn(14, 24)
+
+        eInkFontSize = newSize
+        repository.saveEInkFontSize(newSize)
+    }
+
+
     private var _appLanguage = mutableStateOf(AppLanguage.EN)
     var appLanguage: AppLanguage
         get() = _appLanguage.value
