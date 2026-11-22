@@ -1,0 +1,816 @@
+{
+  "letter": "A",
+  "version": "1.7",
+  "source": "ISTQB CTFL v4.0.1 sample exam",
+  "questions": [
+    {
+      "number": 1,
+      "optionCount": 4,
+      "correct": [
+        2
+      ],
+      "questionImage": "official_samples/A/q01.png",
+      "answerImage": "official_samples/A/a01.png",
+      "lo": "FL-1.1.1",
+      "kLevel": "K1",
+      "chapter": 1,
+      "questionText": "Which of the following statements describe a valid test objective?",
+      "optionTexts": [
+        "To prove that there are no unfixed defects in the system under test",
+        "To prove that there will be no failures after the implementation of the system into production",
+        "To reduce the risk level of the test object and to build confidence in the quality level",
+        "To verify that there are no untested combinations of inputs"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 2,
+      "optionCount": 4,
+      "correct": [
+        0
+      ],
+      "questionImage": "official_samples/A/q02.png",
+      "answerImage": "official_samples/A/a02.png",
+      "lo": "FL-1.2.1",
+      "kLevel": "K2",
+      "chapter": 1,
+      "questionText": "Which of the following options shows an example of test activities that contribute to success?",
+      "optionTexts": [
+        "Having testers involved during various software development lifecycle (SDLC) activities will help to detect defects in work products",
+        "Testers try not to disturb the developers while coding, so that the developers write better code",
+        "Testers collaborating with end users help to improve the quality of defect reports during component integration and system testing",
+        "Certified testers will design much better test cases than non-certified testers"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 3,
+      "optionCount": 4,
+      "correct": [
+        0
+      ],
+      "questionImage": "official_samples/A/q03.png",
+      "answerImage": "official_samples/A/a03.png",
+      "lo": "FL-1.3.1",
+      "kLevel": "K2",
+      "chapter": 1,
+      "questionText": "You have been assigned as a tester to a team producing a new system incrementally. You have noticed that no changes have been made to the existing regression test cases for several iterations and no new regression defects were identified. Your manager is happy, but you are not. Which testing principle explains your skepticism?",
+      "optionTexts": [
+        "Tests wear out",
+        "Absence-of-defects fallacy",
+        "Defects cluster together",
+        "Exhaustive testing is impossible"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 4,
+      "optionCount": 4,
+      "correct": [
+        1
+      ],
+      "questionImage": "official_samples/A/q04.png",
+      "answerImage": "official_samples/A/a04.png",
+      "lo": "FL-1.4.1",
+      "kLevel": "K2",
+      "chapter": 1,
+      "questionText": "You work in a team that develops a mobile application for food ordering. In the current iteration the team decided to implement the payment functionality. Which of the following activities is a part of test analysis?",
+      "optionTexts": [
+        "Estimating that testing the integration with the payment service will take 8 person-days",
+        "Deciding that the team should test if it is possible to properly share payment between many users",
+        "Using boundary value analysis (BVA) to derive the test data for the test cases that check the correct payment processing for the minimum allowed amount to be paid",
+        "Analyzing the discrepancy between the actual result and expected result after executing a test case that checks the process of payment with a credit card, and reporting a defect"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 5,
+      "optionCount": 4,
+      "correct": [
+        1
+      ],
+      "questionImage": "official_samples/A/q05.png",
+      "answerImage": "official_samples/A/a05.png",
+      "lo": "FL-1.4.2",
+      "kLevel": "K2",
+      "chapter": 1,
+      "questionText": "Which of the following factors have a SIGNIFICANT influence on the test approach?\ni. The SDLC\nii. The number of defects detected in previous projects\niii. The identified product risks\niv. New regulatory requirements forcing formal white-box testing\nv. The test environment setup",
+      "optionTexts": [
+        "i, ii have significant influence",
+        "i, iii, iv have significant influence",
+        "ii, iv, v have significant influence",
+        "iii, v have significant influence"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 6,
+      "optionCount": 5,
+      "correct": [
+        0,
+        4
+      ],
+      "questionImage": "official_samples/A/q06.png",
+      "answerImage": "official_samples/A/a06.png",
+      "lo": "FL-1.4.5",
+      "kLevel": "K2",
+      "chapter": 1,
+      "questionText": "Which TWO of the following tasks belong MAINLY to a testing role?",
+      "optionTexts": [
+        "Configure test environments",
+        "Maintain the product backlog",
+        "Design solutions to new requirements",
+        "Create the test plan",
+        "Analyze the test basis"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 7,
+      "optionCount": 4,
+      "correct": [
+        1
+      ],
+      "questionImage": "official_samples/A/q07.png",
+      "answerImage": "official_samples/A/a07.png",
+      "lo": "FL-1.5.1",
+      "kLevel": "K2",
+      "chapter": 1,
+      "questionText": "Which of the following skills (i-v) are the MOST important skills of a tester?\ni. Having domain knowledge\nii. Creating a product vision\niii. Being a good team player\niv. Planning and organizing the work of the team\nv. Critical thinking",
+      "optionTexts": [
+        "ii and iv are important",
+        "i, iii and v are important",
+        "i, ii and v are important",
+        "iii and iv are important"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 8,
+      "optionCount": 4,
+      "correct": [
+        3
+      ],
+      "questionImage": "official_samples/A/q08.png",
+      "answerImage": "official_samples/A/a08.png",
+      "lo": "FL-1.5.2",
+      "kLevel": "K1",
+      "chapter": 1,
+      "questionText": "How is the whole team approach present in the interactions between testers and business representatives?",
+      "optionTexts": [
+        "Business representatives decide on test automation approaches",
+        "Testers help business representatives to define a test strategy",
+        "Business representatives are not part of the whole team approach",
+        "Testers help business representatives to create suitable acceptance tests"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 9,
+      "optionCount": 4,
+      "correct": [
+        3
+      ],
+      "questionImage": "official_samples/A/q09.png",
+      "answerImage": "official_samples/A/a09.png",
+      "lo": "FL-2.1.2",
+      "kLevel": "K1",
+      "chapter": 2,
+      "questionText": "Consider the following rule: “for every SDLC activity there is a corresponding test activity”. In which SDLC models does this rule hold?",
+      "optionTexts": [
+        "Only in sequential development models",
+        "Only in iterative development models",
+        "Only in iterative and incremental development models",
+        "In sequential, incremental, and iterative development models"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 10,
+      "optionCount": 4,
+      "correct": [
+        2
+      ],
+      "questionImage": "official_samples/A/q10.png",
+      "answerImage": "official_samples/A/a10.png",
+      "lo": "FL-2.1.3",
+      "kLevel": "K1",
+      "chapter": 2,
+      "questionText": "Which of the following statements BEST describes the acceptance test-driven development (ATDD) approach?",
+      "optionTexts": [
+        "In ATDD, acceptance criteria are typically created based on the given/when/then format",
+        "In ATDD, test cases are mainly created at component testing and are code-oriented",
+        "In ATDD, tests are created, based on acceptance criteria to drive the development of the related software",
+        "in ATDD, tests are based on the desired behavior of the software, which makes it easier for team members to understand them"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 11,
+      "optionCount": 4,
+      "correct": [
+        3
+      ],
+      "questionImage": "official_samples/A/q11.png",
+      "answerImage": "official_samples/A/a11.png",
+      "lo": "FL-2.1.5",
+      "kLevel": "K2",
+      "chapter": 2,
+      "questionText": "Which of the following is NOT an example of the shift-left approach?",
+      "optionTexts": [
+        "Reviewing the user requirements before they are formally accepted by the stakeholders",
+        "Writing a component test before the corresponding code is written",
+        "Executing a performance efficiency test for a component during component testing",
+        "Writing a test script before setting up the configuration management process"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 12,
+      "optionCount": 4,
+      "correct": [
+        2
+      ],
+      "questionImage": "official_samples/A/q12.png",
+      "answerImage": "official_samples/A/a12.png",
+      "lo": "FL-2.1.6",
+      "kLevel": "K2",
+      "chapter": 2,
+      "questionText": "Which of the arguments below would you use to convince your manager to organize retrospectives at the end of each release cycle?",
+      "optionTexts": [
+        "Retrospectives are very popular these days and clients would appreciate it if we added them to our processes",
+        "Organizing retrospectives will save the organization money because without them end user representatives do not provide immediate feedback about the product",
+        "Process weaknesses identified during the retrospective can be analyzed and serve as a to do list for the organization’s continuous process improvement program",
+        "Retrospectives embrace five values including courage and respect, which are crucial to maintain continuous improvement in the organization"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 13,
+      "optionCount": 4,
+      "correct": [
+        0
+      ],
+      "questionImage": "official_samples/A/q13.png",
+      "answerImage": "official_samples/A/a13.png",
+      "lo": "FL-2.2.1",
+      "kLevel": "K2",
+      "chapter": 2,
+      "questionText": "Which types of failures (1-4) fit which test levels (A-D) BEST?\n1. Failures in system behavior as it deviates from the user’s business needs\n2. Failures in communication between components\n3. Failures in logic in the code\n4. Failures in not correctly implemented business rules A. Component testing B. Component integration testing C. System testing D. Acceptance testing",
+      "optionTexts": [
+        "1D, 2B, 3A, 4C",
+        "1D, 2B, 3C, 4A",
+        "1B, 2A, 3D, 4C",
+        "1C, 2B, 3A, 4D"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 14,
+      "optionCount": 4,
+      "correct": [
+        1
+      ],
+      "questionImage": "official_samples/A/figure14.png",
+      "answerImage": "official_samples/A/a14.png",
+      "lo": "FL-2.2.3",
+      "kLevel": "K2",
+      "chapter": 2,
+      "originalQuestionImage": "official_samples/A/q14.png",
+      "questionText": "You are testing a user story with three acceptance criteria: AC1, AC2 and AC3. AC1 is covered by test case TC1, AC2 by TC2, and AC3 by TC3. The test execution history had three test runs on three consecutive versions of the software as follows: Tests are repeated once you are informed that all defects found in the test run are corrected and a new version of the software is available. Which of the above tests are executed as regression tests?",
+      "optionTexts": [
+        "Only 4, 7, 8, 9",
+        "Only 5, 7",
+        "Only 4, 6, 8, 9",
+        "Only 5, 6"
+      ],
+      "presentation": "hybrid"
+    },
+    {
+      "number": 15,
+      "optionCount": 4,
+      "correct": [
+        0
+      ],
+      "questionImage": "official_samples/A/q15.png",
+      "answerImage": "official_samples/A/a15.png",
+      "lo": "FL-3.1.2",
+      "kLevel": "K2",
+      "chapter": 3,
+      "questionText": "Which of the following is NOT a benefit of static testing?",
+      "optionTexts": [
+        "Having less expensive defect management due to the ease of detecting defects later in the SDLC",
+        "Fixing defects found during static testing is generally much less expensive than fixing defects found during dynamic testing",
+        "Finding coding defects that might not have been found by only performing dynamic testing",
+        "Detecting gaps and inconsistencies in requirements"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 16,
+      "optionCount": 4,
+      "correct": [
+        3
+      ],
+      "questionImage": "official_samples/A/q16.png",
+      "answerImage": "official_samples/A/a16.png",
+      "lo": "FL-3.2.1",
+      "kLevel": "K1",
+      "chapter": 3,
+      "questionText": "Which of the following is a benefit of early and frequent feedback?",
+      "optionTexts": [
+        "It improves the test process for future projects",
+        "It forces customers to prioritize their requirements based on agreed risks",
+        "It  provides a measure for the quality of changes",
+        "It helps avoid requirements misunderstandings"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 17,
+      "optionCount": 4,
+      "correct": [
+        1
+      ],
+      "questionImage": "official_samples/A/q17.png",
+      "answerImage": "official_samples/A/a17.png",
+      "lo": "FL-3.2.4",
+      "kLevel": "K2",
+      "chapter": 3,
+      "questionText": "The reviews being used in your organization have the following attributes:\n• There is the role of a scribe\n• The main purpose is to evaluate quality\n• The meeting is led by the author of the work product\n• There is individual preparation\n• A review report is produced Which of the following review types is MOST likely being used?",
+      "optionTexts": [
+        "Informal review",
+        "Walkthrough",
+        "Technical review",
+        "Inspection"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 18,
+      "optionCount": 4,
+      "correct": [
+        3
+      ],
+      "questionImage": "official_samples/A/q18.png",
+      "answerImage": "official_samples/A/a18.png",
+      "lo": "FL-3.2.5",
+      "kLevel": "K1",
+      "chapter": 3,
+      "questionText": "Which of these statements is NOT a factor that contributes to successful reviews?",
+      "optionTexts": [
+        "Participants should dedicate adequate time for the review",
+        "Splitting large work products into small parts to make the required effort less intense",
+        "Participants should avoid behaviors that might indicate boredom, exasperation, or hostility to other participants",
+        "Failures found should be acknowledged, appreciated, and handled objectively"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 19,
+      "optionCount": 4,
+      "correct": [
+        2
+      ],
+      "questionImage": "official_samples/A/q19.png",
+      "answerImage": "official_samples/A/a19.png",
+      "lo": "FL-4.1.1",
+      "kLevel": "K2",
+      "chapter": 4,
+      "questionText": "Which of the following is a characteristic of experience-based test techniques?",
+      "optionTexts": [
+        "Test cases are created based on detailed design information",
+        "Items tested within the interface code section are used to measure coverage",
+        "The test techniques heavily rely on the tester’s knowledge of the software and the business domain",
+        "The test cases are used to identify deviations from the requirements"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 20,
+      "optionCount": 4,
+      "correct": [
+        1
+      ],
+      "questionImage": "official_samples/A/q20.png",
+      "answerImage": "official_samples/A/a20.png",
+      "lo": "FL-4.2.1",
+      "kLevel": "K3",
+      "chapter": 4,
+      "questionText": "You are testing a simplified apartment search form which has only two search criteria:\n• floor (with three possible options: ground floor; first floor; second or higher floor)\n• garden type (with three possible options: no garden; small garden; large garden) Each of the apartment on the ground floor has a garden, apartments on higher floors don’t. The form has a built-in validation mechanism that will not allow you to use the search criteria which violate this rule. Each test has two input values: floor and garden type. You want to apply equivalence partitioning (EP) to cover each floor and each garden type in your tests. What is the minimal number of test cases to achieve 100% EP coverage for valid partitions?",
+      "optionTexts": [
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 21,
+      "optionCount": 4,
+      "correct": [
+        0
+      ],
+      "questionImage": "official_samples/A/figure21.png",
+      "answerImage": "official_samples/A/a21.png",
+      "lo": "FL-4.2.2",
+      "kLevel": "K3",
+      "chapter": 4,
+      "originalQuestionImage": "official_samples/A/q21.png",
+      "questionText": "You are testing a system that calculates the final course grade for a given student. The final grade is assigned based on the final result, according to the following rules:\n• 0 – 50 points: failed\n• 51 – 60 points: fair\n• 61 – 70 points: satisfactory\n• 71 – 80 points: good\n• 81 – 90 points: very good\n• 91 – 100 points: excellent You have prepared the following set of test cases: What is the 2-value boundary value analysis (BVA) coverage for the final result that is achieved with the existing test cases?",
+      "optionTexts": [
+        "50%",
+        "60%",
+        "33.3%",
+        "100%"
+      ],
+      "presentation": "hybrid"
+    },
+    {
+      "number": 22,
+      "optionCount": 4,
+      "correct": [
+        3
+      ],
+      "questionImage": "official_samples/A/figure22.png",
+      "answerImage": "official_samples/A/a22.png",
+      "lo": "FL-4.2.3",
+      "kLevel": "K3",
+      "chapter": 4,
+      "originalQuestionImage": "official_samples/A/q22.png",
+      "questionText": "Your favorite bicycle daily rental store has just introduced a new Customer Relationship Management system and asked you, one of their most loyal members, to test it. The implemented features are as follows:\n• Anyone can rent a bicycle, but members receive a 20% discount\n• However, if the return deadline is missed, the discount is no longer available\n• After 15 rentals, members get a gift: a T-Shirt Decision table describing the implemented features looks as follows: Based ONLY on the feature description of the Customer Relationship Management system, which of the above rules describes an impossible situation?",
+      "optionTexts": [
+        "R4",
+        "R2",
+        "R6",
+        "R8"
+      ],
+      "presentation": "hybrid"
+    },
+    {
+      "number": 23,
+      "optionCount": 4,
+      "correct": [
+        3
+      ],
+      "questionImage": "official_samples/A/figure23.png",
+      "answerImage": "official_samples/A/a23.png",
+      "lo": "FL-4.2.4",
+      "kLevel": "K3",
+      "chapter": 4,
+      "originalQuestionImage": "official_samples/A/q23.png",
+      "questionText": "You test a system whose lifecycle is modeled by the state transition diagram shown below. The system starts in the INIT state and ends its operation in the OFF state. What is the MINIMAL number of test cases to achieve valid transitions coverage?",
+      "optionTexts": [
+        "4",
+        "2",
+        "7",
+        "3"
+      ],
+      "presentation": "hybrid"
+    },
+    {
+      "number": 24,
+      "optionCount": 4,
+      "correct": [
+        0
+      ],
+      "questionImage": "official_samples/A/q24.png",
+      "answerImage": "official_samples/A/a24.png",
+      "lo": "FL-4.3.1",
+      "kLevel": "K2",
+      "chapter": 4,
+      "questionText": "Your test suite achieved 100% statement coverage. What is the consequence of this fact?",
+      "optionTexts": [
+        "Each instruction in the code that contains a defect has been executed at least once",
+        "Any test suite containing more test cases than your test suite will also achieve 100% statement coverage",
+        "Each path in the code has been executed at least once",
+        "Every combination of input values has been tested at least once"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 25,
+      "optionCount": 4,
+      "correct": [
+        3
+      ],
+      "questionImage": "official_samples/A/q25.png",
+      "answerImage": "official_samples/A/a25.png",
+      "lo": "FL-4.3.3",
+      "kLevel": "K2",
+      "chapter": 4,
+      "questionText": "Which of the following is NOT true for white-box testing?",
+      "optionTexts": [
+        "During white-box testing the entire software implementation is considered",
+        "White-box coverage metrics can help identify additional tests to increase code coverage",
+        "White-box test techniques can be used in static testing",
+        "White-box testing can help identify gaps in requirements implementation"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 26,
+      "optionCount": 4,
+      "correct": [
+        0
+      ],
+      "questionImage": "official_samples/A/q26.png",
+      "answerImage": "official_samples/A/a26.png",
+      "lo": "FL-4.4.1",
+      "kLevel": "K2",
+      "chapter": 4,
+      "questionText": "Which of the following BEST describes the concept behind error guessing?",
+      "optionTexts": [
+        "Error guessing involves using your knowledge and experience of defects found in the past and typical errors made by developers",
+        "Error guessing involves using your personal experience of development and the errors you made as a developer",
+        "Error guessing requires you to imagine that you are the user of the test object and to guess errors the user could make interacting with it",
+        "Error guessing requires you to rapidly duplicate the development task to identify the sort of errors a developer might make"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 27,
+      "optionCount": 4,
+      "correct": [
+        2
+      ],
+      "questionImage": "official_samples/A/q27.png",
+      "answerImage": "official_samples/A/a27.png",
+      "lo": "FL-4.4.2",
+      "kLevel": "K2",
+      "chapter": 4,
+      "questionText": "In your project there has been a delay in the release of a brand-new application and test execution started late, but you have very detailed domain knowledge and good analytical skills. The full list of requirements has not yet been shared with the team, but management is asking for some test results to be presented. Which test technique fits BEST in this situation?",
+      "optionTexts": [
+        "Checklist-based testing",
+        "Error guessing",
+        "Exploratory testing",
+        "Branch testing"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 28,
+      "optionCount": 4,
+      "correct": [
+        1
+      ],
+      "questionImage": "official_samples/A/q28.png",
+      "answerImage": "official_samples/A/a28.png",
+      "lo": "FL-4.5.2",
+      "kLevel": "K2",
+      "chapter": 4,
+      "questionText": "Which of the following BEST describes the way acceptance criteria can be documented?",
+      "optionTexts": [
+        "Performing retrospectives to determine the actual needs of the stakeholders regarding a given user story",
+        "Using the given/when/then format to describe an example test condition related to a given user story",
+        "Using verbal communication to reduce the risk of misunderstanding the acceptance criteria by others",
+        "Documenting risks related to a given user story in a test plan to facilitate the risk-based testing of a given user story"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 29,
+      "optionCount": 4,
+      "correct": [
+        0
+      ],
+      "questionImage": "official_samples/A/q29.png",
+      "answerImage": "official_samples/A/a29.png",
+      "lo": "FL-4.5.3",
+      "kLevel": "K3",
+      "chapter": 4,
+      "questionText": "Consider the following user story: As an Editor I want to review content before it is published so that I can ensure the grammar is correct and its acceptance criteria:\n• The user can log in to the content management system with \"Editor\" role\n• The editor can view existing content pages\n• The editor can edit the page content\n• The editor can add markup comments\n• The editor can save changes\n• The editor can reassign to the \"content owner\" role to make updates Which of the following is the BEST example of an ATDD test for this user story?",
+      "optionTexts": [
+        "Test if the editor can save the document after edit the page content",
+        "Test if the content owner can log in and make updates to the content",
+        "Test if the editor can schedule the edited content for publication",
+        "Test if the editor can reassign to another editor to make updates"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 30,
+      "optionCount": 4,
+      "correct": [
+        2
+      ],
+      "questionImage": "official_samples/A/q30.png",
+      "answerImage": "official_samples/A/a30.png",
+      "lo": "FL-5.1.2",
+      "kLevel": "K1",
+      "chapter": 5,
+      "questionText": "How do testers add value to iteration and release planning?",
+      "optionTexts": [
+        "Testers determine the priority of the user stories to be developed",
+        "Testers focus only on the functional aspects of the system to be tested",
+        "Testers participate in the detailed risk identification and risk assessment of user stories",
+        "Testers guarantee the release of high-quality software through early test design during the release planning"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 31,
+      "optionCount": 5,
+      "correct": [
+        2,
+        4
+      ],
+      "questionImage": "official_samples/A/q31.png",
+      "answerImage": "official_samples/A/a31.png",
+      "lo": "FL-5.1.3",
+      "kLevel": "K2",
+      "chapter": 5,
+      "questionText": "Which TWO of the following options are the exit criteria for testing a system?",
+      "optionTexts": [
+        "Test environment readiness",
+        "The ability to log in to the test object by the tester",
+        "Estimated defect density is reached",
+        "Requirements are translated into given/when/then format",
+        "Regression tests are automated"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 32,
+      "optionCount": 4,
+      "correct": [
+        3
+      ],
+      "questionImage": "official_samples/A/q32.png",
+      "answerImage": "official_samples/A/a32.png",
+      "lo": "FL-5.1.4",
+      "kLevel": "K3",
+      "chapter": 5,
+      "questionText": "Your team uses the three-point estimation technique to estimate the test effort for a new high-risk feature. The following estimates were made:\n• Most optimistic estimation: 2 person-hours\n• Most likely estimation: 11 person-hours\n• Most pessimistic estimation: 14 person-hours What is the final estimate?",
+      "optionTexts": [
+        "9 person-hours",
+        "14 person-hours",
+        "11 person-hours",
+        "10 person-hours"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 33,
+      "optionCount": 4,
+      "correct": [
+        0
+      ],
+      "questionImage": "official_samples/A/figure33.png",
+      "answerImage": "official_samples/A/a33.png",
+      "lo": "FL-5.1.5",
+      "kLevel": "K3",
+      "chapter": 5,
+      "originalQuestionImage": "official_samples/A/q33.png",
+      "questionText": "You are testing a mobile application that allows users to find a nearby restaurant based on the type of food they want to eat. Consider the following list of test cases, priorities (i.e., a smaller number means a higher priority), and dependencies: Which of the following test cases should be executed as the third one?",
+      "optionTexts": [
+        "TC 003",
+        "TC 005",
+        "TC 002",
+        "TC 001"
+      ],
+      "presentation": "hybrid"
+    },
+    {
+      "number": 34,
+      "optionCount": 4,
+      "correct": [
+        0
+      ],
+      "questionImage": "official_samples/A/q34.png",
+      "answerImage": "official_samples/A/a34.png",
+      "lo": "FL-5.1.7",
+      "kLevel": "K2",
+      "chapter": 5,
+      "questionText": "Consider the following test categories (1-4) and agile testing quadrants (A-D):\n1. Usability testing\n2. Component testing\n3. Functional testing\n4. Reliability testing A. Agile testing quadrant Q1: technology facing, supporting the development team B. Agile testing quadrant Q2: business facing, supporting the development team C. Agile testing quadrant Q3: business facing, critique the product D. Agile testing quadrant Q4: technology facing, critique the product How do the following test categories map onto the agile testing quadrants?",
+      "optionTexts": [
+        "1C, 2A, 3B, 4D",
+        "1D, 2A, 3C, 4B",
+        "1C, 2B, 3D, 4A",
+        "1D, 2B, 3C, 4A"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 35,
+      "optionCount": 4,
+      "correct": [
+        2
+      ],
+      "questionImage": "official_samples/A/q35.png",
+      "answerImage": "official_samples/A/a35.png",
+      "lo": "FL-5.2.4",
+      "kLevel": "K2",
+      "chapter": 5,
+      "questionText": "During a risk analysis the following risk was identified and assessed:\n• Risk: Response time is too long to generate a report\n• Risk likelihood: medium; risk impact: high\n• Response to risk: o An independent test team performs performance efficiency testing during system testing o A selected sample of end users performs alpha testing and beta testing before the release What measure is proposed to be taken in response to this analyzed risk?",
+      "optionTexts": [
+        "Risk acceptance",
+        "Contingency plan",
+        "Risk mitigation",
+        "Risk transfer"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 36,
+      "optionCount": 4,
+      "correct": [
+        3
+      ],
+      "questionImage": "official_samples/A/q36.png",
+      "answerImage": "official_samples/A/a36.png",
+      "lo": "FL-5.3.3",
+      "kLevel": "K2",
+      "chapter": 5,
+      "questionText": "Which work product can be used by an agile team to show the amount of work that has been completed and the amount of total work remaining for a given iteration?",
+      "optionTexts": [
+        "Acceptance criteria",
+        "Defect report",
+        "Test completion report",
+        "Burndown chart"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 37,
+      "optionCount": 4,
+      "correct": [
+        2
+      ],
+      "questionImage": "official_samples/A/q37.png",
+      "answerImage": "official_samples/A/a37.png",
+      "lo": "FL-5.4.1",
+      "kLevel": "K2",
+      "chapter": 5,
+      "questionText": "You need to update one of the automated test scripts to be in line with a new requirement. Which process indicates that you create a new version of the test script in the test repository?",
+      "optionTexts": [
+        "Traceability management",
+        "Maintenance testing",
+        "Configuration management",
+        "Requirements engineering"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 38,
+      "optionCount": 4,
+      "correct": [
+        2
+      ],
+      "questionImage": "official_samples/A/q38.png",
+      "answerImage": "official_samples/A/a38.png",
+      "lo": "FL-5.5.1",
+      "kLevel": "K3",
+      "chapter": 5,
+      "questionText": "You received the following defect report from the developers stating that the anomaly described in this test report is not reproducible. Application hangs up 2022-May-03 – John Doe – Rejected The application hangs up after entering “Test input: $ä” in the Name field on the new user creation screen. Tried to log off, log in with test_admin01 account, same issue. Tried with other test admin accounts, same issue. No error message received; log (see attached) contains fatal error notification. Based on the test case TC-1305, the application should accept the provided input and create the user. Please fix with high priority, this feature is related to REQ-0012, which is a critical new business requirement. What critical information is MISSING from this test report that would have been useful for the developers?",
+      "optionTexts": [
+        "Expected result and actual result",
+        "References and defect status",
+        "Test environment and test item",
+        "Priority and severity"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 39,
+      "optionCount": 4,
+      "correct": [
+        2
+      ],
+      "questionImage": "official_samples/A/q39.png",
+      "answerImage": "official_samples/A/a39.png",
+      "lo": "FL-6.1.1",
+      "kLevel": "K2",
+      "chapter": 6,
+      "questionText": "Which test activity does a data preparation tool support?",
+      "optionTexts": [
+        "Test monitoring and test control",
+        "Test analysis",
+        "Test design and test implementation",
+        "Test completion"
+      ],
+      "presentation": "text"
+    },
+    {
+      "number": 40,
+      "optionCount": 4,
+      "correct": [
+        1
+      ],
+      "questionImage": "official_samples/A/q40.png",
+      "answerImage": "official_samples/A/a40.png",
+      "lo": "FL-6.2.1",
+      "kLevel": "K1",
+      "chapter": 6,
+      "questionText": "Which item correctly identifies a potential risk of performing test automation?",
+      "optionTexts": [
+        "It may introduce unknown regressions in production",
+        "Sufficient efforts to maintain testware may not be properly allocated",
+        "Testing tools and associated testware may not be sufficiently relied upon",
+        "It may reduce the time allocated for manual testing"
+      ],
+      "presentation": "text"
+    }
+  ]
+}

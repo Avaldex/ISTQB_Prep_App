@@ -262,7 +262,8 @@ class IstqbViewModel(application: Application) : AndroidViewModel(application) {
         }
         val title = if (appLanguage == AppLanguage.EN)
             "ISTQB Exam (Random Chapter Mix)"
-        else "Экзамен ISTQB (Случайный микс глав)"
+        else
+            "Экзамен ISTQB (Случайный микс глав)"
         launchQuiz(title, questions, examMode = true)
     }
 
