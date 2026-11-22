@@ -188,7 +188,13 @@ class IstqbViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun startChapterTest(chapter: Int) {
-        val qs = db.questions.filter { it.chapter == chapter && it.source == "SYLLABUS" }
+        val qs = db.questions
+            .filter { it.chapter == chapter && it.source == "SYLLABUS" }
+
+            .distinctBy { it.id }
+            .shuffled()
+            .map { shuffleQuestionOptions(it) }
+
         val title = if (appLanguage == AppLanguage.EN) {
             "Test: Chapter $chapter (Syllabus)"
         } else {
@@ -254,6 +260,16 @@ class IstqbViewModel(application: Application) : AndroidViewModel(application) {
             "Практическое задание к модулю"
         }
         launchQuiz(title, listOf(q), examMode = false)
+    }
+
+    // Shuffle answers and their explanations together, preserving the correct answer.
+    private fun shuffleQuestionOptions(question: Question): Question {
+        val order = question.options.indices.shuffled()
+        return question.copy(
+            options = order.map { question.options[it] },
+            correctIndex = order.indexOf(question.correctIndex),
+            explanationsWrong = order.map { question.explanationsWrong[it] }
+        )
     }
 
     private fun launchQuiz(title: String, questions: List<Question>, examMode: Boolean) {
