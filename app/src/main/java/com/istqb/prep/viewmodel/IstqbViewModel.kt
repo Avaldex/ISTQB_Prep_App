@@ -108,6 +108,75 @@ class IstqbViewModel(application: Application) : AndroidViewModel(application) {
         return repository.getWrongIds().mapNotNull { it.toIntOrNull() }.toSet()
     }
 
+    data class LearningProgress(
+        val total: Int,
+        val correct: Int,
+        val wrong: Int
+    ) {
+        val answered: Int
+            get() = correct + wrong
+
+        val progressPercent: Double
+            get() = if (total > 0) {
+                answered * 100.0 / total
+            } else 0.0
+
+        val masteryPercent: Double
+            get() = if (total > 0) {
+                correct * 100.0 / total
+            } else 0.0
+
+        val accuracyPercent: Double
+            get() = if (answered > 0) {
+                correct * 100.0 / answered
+            } else 0.0
+    }
+
+    fun getOverallSyllabusProgress(): LearningProgress {
+
+        val allQuestionIds = db.questions
+            .filter { it.source == "SYLLABUS" }
+            .map { it.id }
+            .toSet()
+
+        val correctIds = getCorrectQuestionIds()
+            .intersect(allQuestionIds)
+
+        val wrongIds = getWrongQuestionIds()
+            .intersect(allQuestionIds)
+            .minus(correctIds)
+
+        return LearningProgress(
+            total = allQuestionIds.size,
+            correct = correctIds.size,
+            wrong = wrongIds.size
+        )
+    }
+
+    fun getTopicProgress(module: StudyModule): LearningProgress {
+
+        val topicQuestionIds = db.questions
+            .filter {
+                it.source == "SYLLABUS" &&
+                        it.moduleId == module.id
+            }
+            .map { it.id }
+            .toSet()
+
+        val correctIds = getCorrectQuestionIds()
+            .intersect(topicQuestionIds)
+
+        val wrongIds = getWrongQuestionIds()
+            .intersect(topicQuestionIds)
+            .minus(correctIds)
+
+        return LearningProgress(
+            total = topicQuestionIds.size,
+            correct = correctIds.size,
+            wrong = wrongIds.size
+        )
+    }
+
     fun recordTopicAnswer(questionId: Int, isCorrect: Boolean) {
         repository.recordAnswer(questionId, isCorrect)
         statsVersion++

@@ -622,7 +622,10 @@ fun IstqbAppRoot(
                             modules = syllabusModules,
                             isEInk = isEInk,
                             isTablet = isTablet,
-                            onModuleClick = { viewModel.openModule(it) }
+
+                            onModuleClick = { viewModel.openModule(it) },
+                            viewModel = viewModel
+
                         )
                     }
 
@@ -984,7 +987,10 @@ private fun ModuleListScreen(
     modules: List<StudyModule>,
     isEInk: Boolean,
     isTablet: Boolean,
-    onModuleClick: (StudyModule) -> Unit
+
+    onModuleClick: (StudyModule) -> Unit,
+    viewModel: IstqbViewModel? = null
+
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -992,6 +998,15 @@ private fun ModuleListScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(modules, key = { it.id }) { module ->
+
+            val topicProgress = if (
+                module.source == "SYLLABUS" && viewModel != null
+            ) {
+                viewModel.getTopicProgress(module)
+            } else {
+                null
+            }
+
             StyledCard(isEInk = isEInk, onClick = { onModuleClick(module) }) {
                 Text(
                     text = "${strings.chapterPrefix(module.chapter)} • ${module.title}",
@@ -1004,6 +1019,48 @@ private fun ModuleListScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 3
                 )
+
+                if (topicProgress != null) {
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text(
+                        text = "Topic Progress: %.1f%%".format(
+                            topicProgress.progressPercent
+                        ),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                            .background(Color.LightGray)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(
+                                    (topicProgress.progressPercent / 100.0)
+                                        .toFloat()
+                                        .coerceIn(0f, 1f)
+                                )
+                                .height(6.dp)
+                                .background(
+                                    if (isEInk) Color.Black
+                                    else MaterialTheme.colorScheme.primary
+                                )
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = "Answered: ${topicProgress.answered} / ${topicProgress.total}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
             }
         }
     }
@@ -1684,12 +1741,70 @@ private fun StatisticsScreen(
 ) {
     val horizontalPad = if (isTablet) 28.dp else 16.dp
     val wrongQuestions = viewModel.db.questions.filter { it.id in wrongIds }
+    val overallProgress = viewModel.getOverallSyllabusProgress()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = horizontalPad, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        item {
+            StyledCard(isEInk = isEInk) {
+                Text(
+                    text = "Overall Syllabus Progress",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Progress: %.1f%%".format(
+                        overallProgress.progressPercent
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .background(Color.LightGray)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(
+                                (overallProgress.progressPercent / 100.0)
+                                    .toFloat()
+                                    .coerceIn(0f, 1f)
+                            )
+                            .height(8.dp)
+                            .background(
+                                if (isEInk) Color.Black
+                                else MaterialTheme.colorScheme.primary
+                            )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Answered: ${overallProgress.answered} / ${overallProgress.total}"
+                )
+
+                Text(
+                    text = "Mastery: %.1f%%".format(
+                        overallProgress.masteryPercent
+                    )
+                )
+
+                Text(
+                    text = "Correct: ${overallProgress.correct}  •  Mistakes: ${overallProgress.wrong}"
+                )
+            }
+        }
+
         item {
             StyledCard(isEInk = isEInk) {
                 Text(
