@@ -4,6 +4,7 @@
 package com.istqb.prep.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -63,6 +64,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.asImageBitmap
+import android.graphics.BitmapFactory
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -77,6 +84,7 @@ import com.istqb.prep.data.ScreenRoute
 import com.istqb.prep.data.StudyModule
 import com.istqb.prep.viewmodel.IstqbViewModel
 import kotlinx.coroutines.delay
+import java.util.Locale
 import kotlinx.coroutines.launch
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -738,7 +746,10 @@ fun IstqbAppRoot(
                             isEInk = isEInk,
                             isTablet = isTablet,
                             onStartRandomExam = { viewModel.startRandomExam() },
-                            onStartTicket = { viewModel.startExamByTicket(it) }
+                            onStartTicket = { viewModel.startExamByTicket(it) },
+                            officialReadyLetters = viewModel.availableOfficialSampleLetters(),
+                            officialError = viewModel.officialExamError,
+                            onStartOfficialExam = { viewModel.startOfficialSampleExam(it) }
                         )
                     }
 
@@ -1511,7 +1522,10 @@ private fun ExamTicketsScreen(
     isEInk: Boolean,
     isTablet: Boolean,
     onStartRandomExam: () -> Unit,
-    onStartTicket: (Int) -> Unit
+    onStartTicket: (Int) -> Unit,
+    officialReadyLetters: Set<String>,
+    officialError: String?,
+    onStartOfficialExam: (String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -1540,6 +1554,39 @@ private fun ExamTicketsScreen(
             }
         }
 
+        if (officialError != null) {
+            item { Text(officialError, color = MaterialTheme.colorScheme.error) }
+        }
+
+        item {
+            Text(
+                if (strings.isEn) "Official ISTQB Sample Exams A–D"
+                else "Официальные пробные экзамены ISTQB A–D",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        items(listOf("A", "B", "C", "D")) { letter ->
+            val ready = letter in officialReadyLetters
+            OutlinedButton(
+                onClick = { onStartOfficialExam(letter) },
+                enabled = ready,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Sample Exam $letter · 40 " +
+                    if (ready) (if (strings.isEn) "questions" else "вопросов")
+                    else (if (strings.isEn) "(run PDF importer)" else "(нужен импорт PDF)"))
+            }
+        }
+        item {
+            Text(
+                if (strings.isEn)
+                    "Original sample exams appear here after local import from ISTQB PDFs."
+                else "Оригинальные билеты появятся после локального импорта PDF ISTQB.",
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
         items(tickets) { ticketNumber ->
             StyledCard(isEInk = isEInk, onClick = { onStartTicket(ticketNumber) }) {
                 Text(
@@ -1553,6 +1600,35 @@ private fun ExamTicketsScreen(
 }
 
 @Composable
+private fun PdfQuestionImage(assetPath: String) {
+    val context = LocalContext.current
+    val bitmap = remember(assetPath) {
+        runCatching {
+            context.assets.open(assetPath).use { BitmapFactory.decodeStream(it)?.asImageBitmap() }
+        }.getOrNull()
+    }
+    if (bitmap != null) {
+        var enlarged by remember(assetPath) { mutableStateOf(false) }
+        val screenWidth = LocalConfiguration.current.screenWidthDp
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            OutlinedButton(onClick = { enlarged = !enlarged }) {
+                Text(if (enlarged) "Zoom −" else "Zoom +")
+            }
+            Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
+                Image(
+                    bitmap = bitmap,
+                    contentDescription = null,
+                    modifier = Modifier.width(if (enlarged) 700.dp else (screenWidth - 56).coerceAtLeast(240).dp),
+                    contentScale = ContentScale.FillWidth
+                )
+            }
+        }
+    } else {
+        Text("Missing PDF image: $assetPath")
+    }
+}
+
+@Composable
 private fun QuizRunnerScreen(
     strings: UiStrings,
     viewModel: IstqbViewModel,
@@ -1562,6 +1638,23 @@ private fun QuizRunnerScreen(
 ) {
     val horizontalPad = if (isTablet) 28.dp else 16.dp
     val questions = viewModel.quizQuestions
+    val questionScroll = rememberScrollState()
+    LaunchedEffect(viewModel.quizTitle, viewModel.currentQuestionIndex) {
+        questionScroll.scrollTo(0)
+    }
+    var secondsLeft by remember(viewModel.quizTitle, viewModel.examDeadlineElapsedMs) {
+        mutableIntStateOf(if (viewModel.isExamMode) viewModel.timeRemainingSeconds() else 0)
+    }
+    LaunchedEffect(viewModel.quizTitle, viewModel.examDeadlineElapsedMs, viewModel.isQuizFinished) {
+        while (viewModel.isExamMode && !viewModel.isQuizFinished) {
+            secondsLeft = viewModel.timeRemainingSeconds()
+            if (secondsLeft <= 0) {
+                viewModel.expireExam()
+                break
+            }
+            delay(500L)
+        }
+    }
 
     if (viewModel.isQuizFinished || questions.isEmpty()) {
         val total = questions.size
@@ -1604,6 +1697,56 @@ private fun QuizRunnerScreen(
                 }
             }
 
+            if (viewModel.isExamMode) {
+                if (viewModel.examTimedOut) {
+                    Text(if (strings.isEn) "Time expired" else "Время истекло")
+                }
+                OutlinedButton(
+                    onClick = { viewModel.examReviewIndex = if (viewModel.examReviewIndex == null) 0 else null },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(if (viewModel.examReviewIndex == null)
+                        (if (strings.isEn) "Review answers" else "Разбор ответов")
+                        else (if (strings.isEn) "Hide review" else "Скрыть разбор"))
+                }
+                val idx = viewModel.examReviewIndex
+                if (idx != null && idx in questions.indices) {
+                    val reviewQuestion = questions[idx]
+                    val given = viewModel.examAnswers.getOrElse(idx) { emptySet() }
+                    StyledCard(isEInk = isEInk) {
+                        Text("${idx + 1} / ${questions.size}", fontWeight = FontWeight.Bold)
+                        Text(
+                            (if (strings.isEn) "Your answer: " else "Твой ответ: ") +
+                            (if (given.isEmpty()) "—" else given.sorted().joinToString(", ") { ('A' + it).toString() })
+                        )
+                        Text(
+                            (if (strings.isEn) "Correct: " else "Правильно: ") +
+                            reviewQuestion.allCorrectIndices.sorted().joinToString(", ") { ('A' + it).toString() }
+                        )
+                        if (reviewQuestion.answerImageAsset != null) {
+                            PdfQuestionImage(reviewQuestion.answerImageAsset)
+                        } else {
+                            Text(reviewQuestion.question)
+                            Text(reviewQuestion.explanationCorrect)
+                        }
+                        if (!reviewQuestion.kLevel.isNullOrBlank()) {
+                            Text("${reviewQuestion.kLevel}  ${reviewQuestion.learningObjective.orEmpty()}")
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(
+                            onClick = { viewModel.examReviewIndex = idx - 1 },
+                            enabled = idx > 0,
+                            modifier = Modifier.weight(1f)
+                        ) { Text(if (strings.isEn) "Previous" else "Назад") }
+                        OutlinedButton(
+                            onClick = { viewModel.examReviewIndex = idx + 1 },
+                            enabled = idx < questions.lastIndex,
+                            modifier = Modifier.weight(1f)
+                        ) { Text(if (strings.isEn) "Next" else "Далее") }
+                    }
+                }
+            }
             OutlinedButton(
                 onClick = onFinishToMenu,
                 modifier = Modifier.fillMaxWidth()
@@ -1621,7 +1764,7 @@ private fun QuizRunnerScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(questionScroll)
             .padding(horizontal = horizontalPad, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -1630,18 +1773,40 @@ private fun QuizRunnerScreen(
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.SemiBold
         )
-
-        StyledCard(isEInk = isEInk) {
+        if (viewModel.isExamMode) {
             Text(
-                text = question.question,
+                text = String.format(Locale.ROOT, "%02d:%02d", secondsLeft / 60, secondsLeft % 60),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.Bold
             )
         }
 
+        StyledCard(isEInk = isEInk) {
+            // Hybrid official questions: readable text + only the real table/diagram.
+            // Legacy PDF-only questions retain the original image and letter choices.
+            val hasNativeText = question.questionImageAsset == null ||
+                !question.question.matches(Regex("Question #\\d+"))
+            if (hasNativeText) {
+                Text(
+                    text = question.question,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            question.questionImageAsset?.let { path ->
+                if (hasNativeText) Spacer(modifier = Modifier.height(12.dp))
+                PdfQuestionImage(path)
+            }
+        }
+        if (viewModel.isExamMode && question.allCorrectIndices.size > 1) {
+            Text(if (strings.isEn) "Select ${question.allCorrectIndices.size} answers"
+                else "Выбери ${question.allCorrectIndices.size} варианта")
+        }
+
         question.options.forEachIndexed { index, optionText ->
-            val isSelected = selected == index
-            val isCorrectOption = index == question.correctIndex
+            val isSelected = if (viewModel.isExamMode)
+                index in viewModel.selectedOptionIndices else selected == index
+            val isCorrectOption = index in question.allCorrectIndices
 
             val containerColor = when {
                 !submitted -> if (isEInk) Color.White else MaterialTheme.colorScheme.surface
@@ -1653,7 +1818,10 @@ private fun QuizRunnerScreen(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(enabled = !submitted) { viewModel.selectOption(index) },
+                    .clickable(enabled = !submitted) {
+                        if (viewModel.isExamMode) viewModel.toggleExamOption(index)
+                        else viewModel.selectOption(index)
+                    },
                 shape = if (isEInk) RectangleShape else MaterialTheme.shapes.medium,
                 color = containerColor,
                 border = BorderStroke(
@@ -1668,7 +1836,9 @@ private fun QuizRunnerScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${('A' + index)}. $optionText",
+                        text = if (optionText == ('A' + index).toString())
+                            optionText
+                        else "${('A' + index)}. $optionText",
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f)
                     )
@@ -1683,7 +1853,23 @@ private fun QuizRunnerScreen(
             }
         }
 
-        if (!submitted) {
+        if (viewModel.isExamMode) {
+            Button(
+                onClick = { viewModel.submitAnswer() },
+                enabled = viewModel.selectedOptionIndices.isNotEmpty(),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(if (viewModel.currentQuestionIndex == questions.lastIndex)
+                    (if (strings.isEn) "Finish exam" else "Завершить экзамен")
+                    else strings.nextQuestion)
+            }
+            OutlinedButton(
+                onClick = { viewModel.skipExamQuestion() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(if (strings.isEn) "Skip question" else "Пропустить вопрос")
+            }
+        } else if (!submitted) {
             Button(
                 onClick = { viewModel.submitAnswer() },
                 enabled = selected != null,

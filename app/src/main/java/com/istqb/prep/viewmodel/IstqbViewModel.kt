@@ -1,6 +1,7 @@
 package com.istqb.prep.viewmodel
 
 import android.app.Application
+import android.os.SystemClock
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -94,6 +95,19 @@ class IstqbViewModel(application: Application) : AndroidViewModel(application) {
     var isAnswerSubmitted by mutableStateOf(false)
     var sessionCorrectCount by mutableStateOf(0)
     var isQuizFinished by mutableStateOf(false)
+    var isOfficialSampleExam by mutableStateOf(false)
+        private set
+    var officialExamError by mutableStateOf<String?>(null)
+        private set
+    var examDeadlineElapsedMs by mutableStateOf<Long?>(null)
+        private set
+    var examTimedOut by mutableStateOf(false)
+        private set
+    var selectedOptionIndices by mutableStateOf<Set<Int>>(emptySet())
+        private set
+    var examAnswers by mutableStateOf<List<Set<Int>>>(emptyList())
+        private set
+    var examReviewIndex by mutableStateOf<Int?>(null)
 
     var statsVersion by mutableStateOf(0)
 
@@ -190,11 +204,9 @@ class IstqbViewModel(application: Application) : AndroidViewModel(application) {
     fun startChapterTest(chapter: Int) {
         val qs = db.questions
             .filter { it.chapter == chapter && it.source == "SYLLABUS" }
-
             .distinctBy { it.id }
             .shuffled()
             .map { shuffleQuestionOptions(it) }
-
         val title = if (appLanguage == AppLanguage.EN) {
             "Test: Chapter $chapter (Syllabus)"
         } else {
@@ -214,29 +226,62 @@ class IstqbViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun startExamByTicket(ticketNumber: Int) {
-        val ticketQs = db.questions.filter { it.ticket == ticketNumber }.shuffled()
-        val finalQs = if (ticketQs.isNotEmpty()) ticketQs else db.questions.shuffled().distinctBy { it.id }
-        val title = if (appLanguage == AppLanguage.EN) {
-            "ISTQB Exam - Ticket #$ticketNumber"
-        } else {
-            "Экзамен ISTQB - Билет №$ticketNumber"
+        val questions = db.questions
+            .filter { it.source == "SYLLABUS" && it.ticket == ticketNumber }
+            .distinctBy { it.id }
+            .shuffled()
+            .take(40)
+            .map(::shuffleQuestionOptions)
+        if (questions.size != 40) {
+            officialExamError = if (appLanguage == AppLanguage.EN)
+                "Ticket $ticketNumber has fewer than 40 questions"
+            else "В билете №$ticketNumber менее 40 вопросов"
+            return
         }
-        launchQuiz(title, finalQs, examMode = true)
+        val title = if (appLanguage == AppLanguage.EN)
+            "ISTQB Exam - Ticket #$ticketNumber"
+        else "Экзамен ISTQB - Билет №$ticketNumber"
+        launchQuiz(title, questions, examMode = true)
     }
 
     fun startRandomExam() {
-        val groupedByChapter = db.questions.groupBy { it.chapter }
-        val balanced = mutableListOf<Question>()
-        groupedByChapter.values.forEach { list ->
-            balanced.addAll(list.shuffled().take(2))
+        // Official CTFL v4.0 exam distribution: 8 + 6 + 4 + 11 + 9 + 2 = 40.
+        val distribution = listOf(1 to 8, 2 to 6, 3 to 4, 4 to 11, 5 to 9, 6 to 2)
+        val pools = db.questions
+            .filter { it.source == "SYLLABUS" }
+            .distinctBy { it.id }
+            .groupBy { it.chapter }
+        val questions = distribution.flatMap { (chapter, count) ->
+            pools[chapter].orEmpty().shuffled().take(count)
+        }.shuffled().map(::shuffleQuestionOptions)
+        if (questions.size != 40) {
+            officialExamError = if (appLanguage == AppLanguage.EN)
+                "Not enough questions for a 40-question exam"
+            else "Недостаточно вопросов для экзамена из 40 заданий"
+            return
         }
-        val finalQs = balanced.distinctBy { it.id }.shuffled()
-        val title = if (appLanguage == AppLanguage.EN) {
+        val title = if (appLanguage == AppLanguage.EN)
             "ISTQB Exam (Random Chapter Mix)"
-        } else {
-            "Экзамен ISTQB (Случайный микс глав)"
+        else "Экзамен ISTQB (Случайный микс глав)"
+        launchQuiz(title, questions, examMode = true)
+    }
+
+    private val importedOfficialLetters by lazy {
+        OfficialSampleRepository.availableLetters(getApplication())
+    }
+
+    fun availableOfficialSampleLetters(): Set<String> = importedOfficialLetters
+
+    fun startOfficialSampleExam(letter: String) {
+        val questions = OfficialSampleRepository.load(getApplication(), letter)
+        if (questions == null) {
+            officialExamError = if (appLanguage == AppLanguage.EN)
+                "Sample $letter is not imported or failed validation. Run import_istqb_samples.py."
+            else "Билет $letter не импортирован или не прошёл проверку. Запусти import_istqb_samples.py."
+            return
         }
-        launchQuiz(title, finalQs, examMode = true)
+        val title = "ISTQB Official Sample Exam $letter"
+        launchQuiz(title, questions, examMode = true, official = true)
     }
 
     fun startMistakesReview() {
@@ -268,45 +313,131 @@ class IstqbViewModel(application: Application) : AndroidViewModel(application) {
         return question.copy(
             options = order.map { question.options[it] },
             correctIndex = order.indexOf(question.correctIndex),
-            explanationsWrong = order.map { question.explanationsWrong[it] }
+            correctIndices = question.correctIndices.map { order.indexOf(it) },
+            explanationsWrong = order.map { question.explanationsWrong.getOrElse(it) { "" } }
         )
     }
 
-    private fun launchQuiz(title: String, questions: List<Question>, examMode: Boolean) {
+    private fun launchQuiz(
+        title: String,
+        questions: List<Question>,
+        examMode: Boolean,
+        official: Boolean = false
+    ) {
         quizTitle = title
         quizQuestions = questions
         isExamMode = examMode
+        isOfficialSampleExam = official
+        officialExamError = null
         currentQuestionIndex = 0
         selectedOptionIndex = null
+        selectedOptionIndices = emptySet()
         isAnswerSubmitted = false
         sessionCorrectCount = 0
         isQuizFinished = false
+        examTimedOut = false
+        examReviewIndex = null
+        examAnswers = List(questions.size) { emptySet() }
+        examDeadlineElapsedMs = if (examMode) SystemClock.elapsedRealtime() + 60 * 60 * 1000L else null
         currentRoute = ScreenRoute.QUIZ_RUNNER
     }
 
     fun selectOption(index: Int) {
-        if (!isAnswerSubmitted) {
-            selectedOptionIndex = index
+        if (isAnswerSubmitted || isQuizFinished) return
+        if (isExamMode && examDeadlineElapsedMs != null && timeRemainingSeconds() <= 0) {
+            expireExam()
+            return
         }
+        selectedOptionIndex = index
+        selectedOptionIndices = setOf(index)
+    }
+
+    fun toggleExamOption(index: Int) {
+        if (!isExamMode || isQuizFinished) return
+        if (timeRemainingSeconds() <= 0) {
+            expireExam()
+            return
+        }
+        val question = quizQuestions.getOrNull(currentQuestionIndex) ?: return
+        selectedOptionIndices = if (question.allCorrectIndices.size > 1) {
+            when {
+                index in selectedOptionIndices -> selectedOptionIndices - index
+                selectedOptionIndices.size < question.allCorrectIndices.size -> selectedOptionIndices + index
+                else -> selectedOptionIndices
+            }
+        } else setOf(index)
+        selectedOptionIndex = selectedOptionIndices.singleOrNull()
     }
 
     fun submitAnswer() {
+        if (isExamMode) {
+            advanceExamQuestion()
+            return
+        }
         val selected = selectedOptionIndex ?: return
         val currentQ = quizQuestions.getOrNull(currentQuestionIndex) ?: return
-        val isCorrect = selected == currentQ.correctIndex
-
-        if (isCorrect) {
-            sessionCorrectCount++
-        }
+        val isCorrect = setOf(selected) == currentQ.allCorrectIndices
+        if (isCorrect) sessionCorrectCount++
         repository.recordAnswer(currentQ.id, isCorrect)
         statsVersion++
         isAnswerSubmitted = true
     }
 
+    fun timeRemainingSeconds(): Int {
+        val deadline = examDeadlineElapsedMs ?: return 0
+        return ((deadline - SystemClock.elapsedRealtime() + 999L) / 1000L)
+            .coerceAtLeast(0L).toInt()
+    }
+
+    private fun advanceExamQuestion() {
+        if (!isExamMode || isQuizFinished) return
+        if (timeRemainingSeconds() <= 0) {
+            expireExam()
+            return
+        }
+        val currentQ = quizQuestions.getOrNull(currentQuestionIndex) ?: return
+        val currentAnswer = selectedOptionIndices
+        examAnswers = examAnswers.toMutableList().also { it[currentQuestionIndex] = currentAnswer }
+        val isCorrect = currentAnswer == currentQ.allCorrectIndices
+        if (isCorrect) sessionCorrectCount++
+        // Preserve existing learning statistics for our own tickets/random exams.
+        // Imported official samples never affect the 559-question progress.
+        if (!isOfficialSampleExam && currentAnswer.isNotEmpty() && currentQ.source == "SYLLABUS") {
+            repository.recordAnswer(currentQ.id, isCorrect)
+            statsVersion++
+        }
+        if (currentQuestionIndex == quizQuestions.lastIndex) {
+            isQuizFinished = true
+            return
+        }
+        currentQuestionIndex++
+        selectedOptionIndex = null
+        selectedOptionIndices = emptySet()
+    }
+
+    fun skipExamQuestion() {
+        if (isExamMode) {
+            selectedOptionIndices = emptySet()
+            selectedOptionIndex = null
+            advanceExamQuestion()
+        }
+    }
+
+    fun expireExam() {
+        if (!isExamMode || isQuizFinished) return
+        examTimedOut = true
+        isQuizFinished = true
+    }
+
     fun nextQuestion() {
+        if (isExamMode) {
+            advanceExamQuestion()
+            return
+        }
         if (currentQuestionIndex + 1 < quizQuestions.size) {
             currentQuestionIndex++
             selectedOptionIndex = null
+            selectedOptionIndices = emptySet()
             isAnswerSubmitted = false
         } else {
             isQuizFinished = true

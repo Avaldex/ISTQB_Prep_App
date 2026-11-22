@@ -27,8 +27,17 @@ data class Question(
     val correctIndex: Int,
     val explanationCorrect: String,
     val explanationsWrong: List<String>,
-    val language: String = "EN"
-)
+    val language: String = "EN",
+    // Only official imported questions need multiple answers or PDF fragments.
+    val correctIndices: List<Int> = emptyList(),
+    val questionImageAsset: String? = null,
+    val answerImageAsset: String? = null,
+    val learningObjective: String? = null,
+    val kLevel: String? = null
+) {
+    val allCorrectIndices: Set<Int>
+        get() = if (correctIndices.isNotEmpty()) correctIndices.toSet() else setOf(correctIndex)
+}
 
 enum class AppDisplayMode(val label: String) {
     STANDARD("Standard"),
