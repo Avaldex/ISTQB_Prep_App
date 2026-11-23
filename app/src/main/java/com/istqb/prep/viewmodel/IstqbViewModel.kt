@@ -62,7 +62,29 @@ class IstqbViewModel(application: Application) : AndroidViewModel(application) {
                 .apply()
         }
 
-    var isDarkTheme by mutableStateOf(false)
+    // Prefer the user's saved theme; otherwise follow the Android system theme.
+    private val themePreferences = application.getSharedPreferences(
+        "istqb_theme_settings",
+        android.content.Context.MODE_PRIVATE
+    )
+
+    private val systemUsesDarkTheme =
+        (application.resources.configuration.uiMode and
+            android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+    private val darkThemeState = mutableStateOf(
+        themePreferences.getBoolean("dark_theme", systemUsesDarkTheme)
+    )
+
+    var isDarkTheme: Boolean
+        get() = darkThemeState.value
+        set(value) {
+            darkThemeState.value = value
+            themePreferences.edit()
+                .putBoolean("dark_theme", value)
+                .apply()
+        }
 
     private val readingPreferences = application.getSharedPreferences(
         "istqb_reading_settings",

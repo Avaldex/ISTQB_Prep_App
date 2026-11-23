@@ -7,6 +7,10 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.content.ActivityNotFoundException
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +41,7 @@ import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
@@ -52,6 +57,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -75,6 +81,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.istqb.prep.data.AppDisplayMode
@@ -265,13 +273,29 @@ fun IstqbAppRoot(
     isTablet: Boolean
 ) {
     val s = stringsFor(viewModel.appLanguage)
+    val context = LocalContext.current
+    val introPreferences = remember(context) {
+        context.getSharedPreferences("istqb_intro_settings", Context.MODE_PRIVATE)
+    }
+    var showIntroOnStartup by remember {
+        mutableStateOf(introPreferences.getBoolean("show_intro_on_startup", true))
+    }
+    // The welcome guide is decided once per app launch. Turning the setting ON
+    // in the drawer must not unexpectedly reopen the guide mid-session.
+    var introVisible by remember {
+        mutableStateOf(viewModel.showIntroScreen && showIntroOnStartup)
+    }
 
-    if (viewModel.showIntroScreen) {
+    if (introVisible) {
         IntroSplashScreen(
             strings = s,
             isDarkTheme = viewModel.isDarkTheme,
             isReadingMode = viewModel.isReadingMode && viewModel.displayMode != AppDisplayMode.EINK,
-            onContinue = { viewModel.showIntroScreen = false }
+            isEInk = viewModel.displayMode == AppDisplayMode.EINK,
+            onContinue = {
+                introVisible = false
+                viewModel.showIntroScreen = false
+            }
         )
         return
     }
@@ -355,18 +379,28 @@ fun IstqbAppRoot(
         gesturesEnabled = currentRoute == ScreenRoute.HOME,
         drawerContent = {
             ModalDrawerSheet(
-                drawerContainerColor = if (isReadingContent) readingSurface else MaterialTheme.colorScheme.surface,
-                drawerContentColor = if (isReadingContent) readingText else MaterialTheme.colorScheme.onSurface
+                drawerContainerColor = when {
+                    isEInk -> Color.White
+                    isReadingContent -> readingSurface
+                    else -> MaterialTheme.colorScheme.surface
+                },
+                drawerContentColor = when {
+                    isEInk -> Color.Black
+                    isReadingContent -> readingText
+                    else -> MaterialTheme.colorScheme.onSurface
+                }
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     IstqbLogoHeader(
                         title = s.appTitle,
-                        subtitle = s.preparationSubtitle
+                        subtitle = s.preparationSubtitle,
+                        isEInk = isEInk
                     )
 
                     HorizontalDivider()
@@ -543,6 +577,78 @@ fun IstqbAppRoot(
                             onCheckedChange = { recordTopicAnswersToStats = it }
                         )
                     }
+
+                    HorizontalDivider()
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = if (s.isEn) "Show intro on startup" else "Показывать инструкцию при запуске",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Switch(
+                            checked = showIntroOnStartup,
+                            onCheckedChange = { enabled ->
+                                showIntroOnStartup = enabled
+                                introPreferences.edit()
+                                    .putBoolean("show_intro_on_startup", enabled)
+                                    .apply()
+                            },
+                            colors = if (isEInk) SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = Color.Black,
+                                uncheckedThumbColor = Color.Black,
+                                uncheckedTrackColor = Color.White,
+                                uncheckedBorderColor = Color.Black
+                            ) else SwitchDefaults.colors()
+                        )
+                    }
+
+                    HorizontalDivider()
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Developed by",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (isEInk) Color.Black else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "Vladislav Bugaev",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "GitHub · @Avaldex",
+                            modifier = Modifier.clickable {
+                                openDeveloperLink(context, "https://github.com/Avaldex")
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            textDecoration = TextDecoration.Underline
+                        )
+                        Text(
+                            text = "LinkedIn · Vladislav Bugaev",
+                            modifier = Modifier.clickable {
+                                openDeveloperLink(context, "https://www.linkedin.com/in/vladislav-bugaev/")
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            textDecoration = TextDecoration.Underline
+                        )
+                        Text(
+                            text = "Independent ISTQB CTFL study app.\nNot affiliated with or endorsed by ISTQB.",
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center,
+                            color = if (isEInk) Color.Black else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
         }
@@ -667,6 +773,8 @@ fun IstqbAppRoot(
                                     }
                                 },
                                 isEInk = isEInk,
+                                isDarkTheme = viewModel.isDarkTheme,
+                                isReadingMode = isReadingContent,
                                 isTablet = isTablet,
                                 onStartPractice = { viewModel.startSinglePracticeQuestion(module.practiceQuestionId) },
                                 onStartChapterTest = { viewModel.startChapterTest(module.chapter) }
@@ -778,51 +886,230 @@ fun IstqbAppRoot(
     } // MaterialTheme: global reading palette
 }
 
+private fun openDeveloperLink(context: Context, url: String) {
+    try {
+        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    } catch (_: ActivityNotFoundException) {
+        // A device without a browser should not crash the application.
+    }
+}
+
 @Composable
 private fun IntroSplashScreen(
     strings: UiStrings,
     isDarkTheme: Boolean,
     isReadingMode: Boolean,
+    isEInk: Boolean,
     onContinue: () -> Unit
 ) {
-    LaunchedEffect(Unit) {
-        delay(1200)
-        onContinue()
-    }
-
-    val bg = when {
+    // Only the welcome screen changes; the examination and scoring UI is untouched.
+    // No large white card: text sits directly on the active theme background.
+    val background = when {
+        isEInk -> Color.White
         isReadingMode -> Color(0xFFF5E9C9)
-        isDarkTheme -> Color(0xFF101318)
-        else -> MaterialTheme.colorScheme.background
+        isDarkTheme -> Color(0xFF121119)
+        else -> Color(0xFFFFFCF7)
     }
-    val fg = when {
+    val foreground = when {
+        isEInk -> Color.Black
         isReadingMode -> Color(0xFF35291C)
-        isDarkTheme -> Color.White
-        else -> MaterialTheme.colorScheme.onBackground
+        isDarkTheme -> Color(0xFFF5F1FC)
+        else -> Color(0xFF30251F)
+    }
+    val accent = when {
+        isEInk -> Color.Black
+        isReadingMode -> Color(0xFF4B2674)
+        isDarkTheme -> Color(0xFFD6B5FA)
+        else -> Color(0xFF4C2479)
+    }
+    val lineColor = when {
+        isEInk -> Color(0xFF666666)
+        isReadingMode -> Color(0xFFC2AE8B)
+        isDarkTheme -> Color(0xFF50475C)
+        else -> Color(0xFFDAD2C8)
+    }
+    val noteBackground = when {
+        isEInk -> Color.White
+        isReadingMode -> Color(0xFFE8D8B1)
+        isDarkTheme -> Color(0xFF342B21)
+        else -> Color(0xFFFFF1D2)
+    }
+    val buttonColor = when {
+        isEInk -> Color.Black
+        isReadingMode -> Color(0xFF57318B)
+        isDarkTheme -> Color(0xFF7850B4)
+        else -> Color(0xFF67409E)
     }
 
-    Box(
+    val guideTitle = if (strings.isEn) "How to use the app" else "Как пользоваться приложением"
+    val guide = if (strings.isEn) listOf(
+        "Study the Syllabus" to "Open Learning: Syllabus to read the topics and answer the questions after them.",
+        "Chapter Tests" to "Choose Chapter Tests to check your knowledge. Your answers are included in the syllabus statistics.",
+        "Exam Mode" to "Take exam tickets, a random exam, or official ISTQB Sample A–D exams. You have 60 minutes per exam. The passing score is 65%.",
+        "Review Your Mistakes" to "Go to Statistics & Mistakes → Mistakes Review to revisit questions answered incorrectly. Correct answers remove them from future reviews.",
+        "Settings" to "Use the ☰ menu to choose Russian or English, light or dark theme, Reading Mode and E-Ink Mode. You can also disable this intro."
+    ) else listOf(
+        "Изучение силлабуса" to "Откройте «Обучение: Силлабус», чтобы изучать темы и отвечать на вопросы после них.",
+        "Тесты по главам" to "Откройте «Тест по главам», чтобы проверить знания. Результаты учитываются в статистике силлабуса.",
+        "Режим экзамена" to "Пройдите экзаменационные билеты, случайный экзамен или официальные Sample A–D. На экзамен отводится 60 минут, проходной порог — 65%.",
+        "Работа над ошибками" to "Откройте «Статистика и ошибки» → «Работа над ошибками». Там собраны вопросы, на которые вы ответили неверно. После правильного ответа вопрос убирается из следующих тренировок.",
+        "Настройки" to "В меню ☰ можно выбрать язык, светлую или тёмную тему, режим чтения и E-Ink, а также отключить эту инструкцию."
+    )
+    val icons = listOf(
+        Icons.Default.School,
+        Icons.Default.Quiz,
+        Icons.Default.Timer,
+        Icons.Default.ErrorOutline,
+        Icons.Default.Language
+    )
+    val iconColors = if (isEInk) List(5) { Color.Black } else listOf(
+        Color(0xFF2670CB), Color(0xFF198754), accent,
+        Color(0xFFC94A4A), Color(0xFF2670CB)
+    )
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(bg)
-            .clickable(onClick = onContinue)
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
+            .background(background)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp, vertical = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        Text(
+            text = if (strings.isEn) "Welcome to" else "Добро пожаловать в",
+            color = foreground,
+            style = MaterialTheme.typography.headlineMedium,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-            IstqbLogoHeader(
-                title = strings.appTitle,
-                subtitle = strings.preparationSubtitle,
-                textColor = fg
+            Surface(
+                color = if (isEInk) Color.Black else Color(0xFFB71C1C),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text(
+                    text = "ISTQB",
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+                    color = Color.White,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 19.sp
+                )
+            }
+            Spacer(modifier = Modifier.width(9.dp))
+            Text(
+                text = "CTFL Preparation",
+                color = foreground,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
             )
-            Spacer(modifier = Modifier.height(12.dp))
-            Button(onClick = onContinue) {
-                Text(strings.introContinue)
+        }
+        Text(
+            text = if (strings.isEn)
+                "All information is based on Official ISTQB CTFL Syllabus 4.0.1"
+            else
+                "Материалы основаны на официальном силлабусе ISTQB CTFL 4.0.1",
+            color = foreground,
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+            text = guideTitle,
+            color = accent,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+
+        guide.forEachIndexed { index, (title, description) ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                Icon(
+                    imageVector = icons[index],
+                    contentDescription = null,
+                    tint = iconColors[index],
+                    modifier = Modifier.size(32.dp)
+                )
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(
+                        text = "${index + 1}. $title",
+                        color = accent,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = description,
+                        color = foreground,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+            if (index != guide.lastIndex) {
+                HorizontalDivider(color = lineColor, thickness = 1.dp)
             }
         }
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            color = noteBackground,
+            border = if (isEInk) BorderStroke(1.dp, Color.Black) else null
+        ) {
+            Row(
+                modifier = Modifier.padding(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ErrorOutline,
+                    contentDescription = null,
+                    tint = foreground
+                )
+                Text(
+                    text = if (strings.isEn)
+                        "Note: Official Sample A–D exams do not affect your syllabus statistics."
+                    else
+                        "Важно: официальные Sample A–D не влияют на статистику силлабуса.",
+                    color = foreground,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+        Text(
+            text = "Good Luck!",
+            color = accent,
+            fontFamily = FontFamily.Cursive,
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(vertical = 6.dp)
+        )
+        Button(
+            onClick = onContinue,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = buttonColor,
+                contentColor = Color.White
+            ),
+            shape = RoundedCornerShape(50.dp)
+        ) {
+            Text(
+                text = strings.introContinue,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }
 
@@ -830,14 +1117,15 @@ private fun IntroSplashScreen(
 private fun IstqbLogoHeader(
     title: String,
     subtitle: String,
-    textColor: Color = MaterialTheme.colorScheme.onSurface
+    textColor: Color = MaterialTheme.colorScheme.onSurface,
+    isEInk: Boolean = false
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Surface(
-            color = Color(0xFFB71C1C),
+            color = if (isEInk) Color.Black else Color(0xFFB71C1C),
             shape = MaterialTheme.shapes.medium
         ) {
             Box(
@@ -891,7 +1179,8 @@ private fun HomeScreen(
             ) {
                 IstqbLogoHeader(
                     title = strings.appTitle,
-                    subtitle = strings.preparationSubtitle
+                    subtitle = strings.preparationSubtitle,
+                    isEInk = isEInk
                 )
             }
         }
@@ -1093,6 +1382,8 @@ private fun ModuleDetailScreen(
     onToggleRecordToStats: (Boolean) -> Unit,
     onRecordAnswer: (Int, Boolean) -> Unit,
     isEInk: Boolean,
+    isDarkTheme: Boolean,
+    isReadingMode: Boolean,
 
     eInkFontSize: Int,
     onEInkFontSizeChange: (Int) -> Unit,
@@ -1341,11 +1632,42 @@ private fun ModuleDetailScreen(
                 val isSelected = selectedOption == idx
                 val isCorrectOption = idx == currentQ.correctIndex
 
+                // Keep graded answers legible in every theme. In dark mode,
+                // pale feedback backgrounds would make inherited light text unreadable.
+                val darkFeedback = isDarkTheme && !isReadingMode && !isEInk
+                val correctBackground = when {
+                    isEInk -> Color(0xFFE0E0E0)
+                    isReadingMode -> Color(0xFFDCE9C5)
+                    darkFeedback -> Color(0xFF20543D)
+                    else -> Color(0xFFDFF5E6)
+                }
+                val wrongBackground = when {
+                    isEInk -> Color(0xFFCCCCCC)
+                    isReadingMode -> Color(0xFFF0CEC8)
+                    darkFeedback -> Color(0xFF682D39)
+                    else -> Color(0xFFFDE2E1)
+                }
                 val containerColor = when {
                     !isChecked -> if (isEInk) Color.White else MaterialTheme.colorScheme.surface
-                    isCorrectOption -> if (isEInk) Color(0xFFE0E0E0) else Color(0xFFDFF5E6)
-                    isSelected -> if (isEInk) Color(0xFFCCCCCC) else Color(0xFFFDE2E1)
+                    isCorrectOption -> correctBackground
+                    isSelected -> wrongBackground
                     else -> if (isEInk) Color.White else MaterialTheme.colorScheme.surface
+                }
+                val optionForeground = when {
+                    isChecked && isCorrectOption -> when {
+                        isEInk -> Color.Black
+                        isReadingMode -> Color(0xFF35291C)
+                        darkFeedback -> Color(0xFFF8FFF9)
+                        else -> Color(0xFF1B3827)
+                    }
+                    isChecked && isSelected -> when {
+                        isEInk -> Color.Black
+                        isReadingMode -> Color(0xFF35291C)
+                        darkFeedback -> Color(0xFFFFF5F5)
+                        else -> Color(0xFF53242C)
+                    }
+                    isEInk -> Color.Black
+                    else -> MaterialTheme.colorScheme.onSurface
                 }
 
                 Surface(
@@ -1354,6 +1676,7 @@ private fun ModuleDetailScreen(
                         .clickable(enabled = !isChecked) { selectedOption = idx },
                     shape = if (isEInk) RectangleShape else MaterialTheme.shapes.medium,
                     color = containerColor,
+                    contentColor = optionForeground,
                     border = BorderStroke(
                         width = if (isEInk || isSelected) 2.dp else 1.dp,
                         color = if (isEInk) Color.Black else MaterialTheme.colorScheme.outline
@@ -1368,14 +1691,23 @@ private fun ModuleDetailScreen(
                         Text(
                             text = "${('A' + idx)}. $optionText",
                             style = MaterialTheme.typography.bodyLarge,
+                            color = optionForeground,
                             modifier = Modifier.weight(1f)
                         )
                         if (isChecked && isCorrectOption) {
                             Spacer(modifier = Modifier.width(8.dp))
-                            Icon(imageVector = Icons.Default.CheckCircle, contentDescription = strings.correctBadge)
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = strings.correctBadge,
+                                tint = optionForeground
+                            )
                         } else if (isChecked && isSelected) {
                             Spacer(modifier = Modifier.width(8.dp))
-                            Icon(imageVector = Icons.Default.ErrorOutline, contentDescription = strings.wrongBadge)
+                            Icon(
+                                imageVector = Icons.Default.ErrorOutline,
+                                contentDescription = strings.wrongBadge,
+                                tint = optionForeground
+                            )
                         }
                     }
                 }
@@ -1824,6 +2156,20 @@ private fun QuizRunnerScreen(
             val isCorrectOption = index in question.allCorrectIndices
 
             // Before submission, chosen options must remain unmistakable in every mode.
+            // After submission, pair each feedback background with readable text.
+            val darkFeedback = viewModel.isDarkTheme && !isReadingMode && !isEInk
+            val correctBackground = when {
+                isEInk -> Color(0xFFE0E0E0)
+                isReadingMode -> Color(0xFFDCE9C5)
+                darkFeedback -> Color(0xFF20543D)
+                else -> Color(0xFFDFF5E6)
+            }
+            val wrongBackground = when {
+                isEInk -> Color(0xFFCCCCCC)
+                isReadingMode -> Color(0xFFF0CEC8)
+                darkFeedback -> Color(0xFF682D39)
+                else -> Color(0xFFFDE2E1)
+            }
             val containerColor = when {
                 !submitted && isSelected -> when {
                     isEInk -> Color(0xFFD4D4D4)
@@ -1831,9 +2177,30 @@ private fun QuizRunnerScreen(
                     else -> MaterialTheme.colorScheme.primaryContainer
                 }
                 !submitted -> if (isEInk) Color.White else MaterialTheme.colorScheme.surface
-                isCorrectOption -> if (isEInk) Color(0xFFE0E0E0) else Color(0xFFDFF5E6)
-                isSelected -> if (isEInk) Color(0xFFCCCCCC) else Color(0xFFFDE2E1)
+                isCorrectOption -> correctBackground
+                isSelected -> wrongBackground
                 else -> if (isEInk) Color.White else MaterialTheme.colorScheme.surface
+            }
+            val optionForeground = when {
+                submitted && isCorrectOption -> when {
+                    isEInk -> Color.Black
+                    isReadingMode -> Color(0xFF35291C)
+                    darkFeedback -> Color(0xFFF8FFF9)
+                    else -> Color(0xFF1B3827)
+                }
+                submitted && isSelected -> when {
+                    isEInk -> Color.Black
+                    isReadingMode -> Color(0xFF35291C)
+                    darkFeedback -> Color(0xFFFFF5F5)
+                    else -> Color(0xFF53242C)
+                }
+                !submitted && isSelected -> when {
+                    isEInk -> Color.Black
+                    isReadingMode -> Color(0xFF35291C)
+                    else -> MaterialTheme.colorScheme.onPrimaryContainer
+                }
+                isEInk -> Color.Black
+                else -> MaterialTheme.colorScheme.onSurface
             }
             val optionBorderColor = when {
                 isEInk -> Color.Black
@@ -1851,6 +2218,7 @@ private fun QuizRunnerScreen(
                     },
                 shape = if (isEInk) RectangleShape else MaterialTheme.shapes.medium,
                 color = containerColor,
+                contentColor = optionForeground,
                 border = BorderStroke(
                     width = if (isSelected) 3.dp else if (isEInk) 2.dp else 1.dp,
                     color = optionBorderColor
@@ -1867,6 +2235,7 @@ private fun QuizRunnerScreen(
                             optionText
                         else "${('A' + index)}. $optionText",
                         style = MaterialTheme.typography.bodyLarge,
+                        color = optionForeground,
                         modifier = Modifier.weight(1f)
                     )
                     if (!submitted && isSelected) {
@@ -1874,18 +2243,22 @@ private fun QuizRunnerScreen(
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
                             contentDescription = if (strings.isEn) "Selected" else "Выбрано",
-                            tint = when {
-                                isEInk -> Color.Black
-                                isReadingMode -> Color(0xFF35291C)
-                                else -> MaterialTheme.colorScheme.onPrimaryContainer
-                            }
+                            tint = optionForeground
                         )
                     } else if (submitted && isCorrectOption) {
                         Spacer(modifier = Modifier.width(8.dp))
-                        Icon(imageVector = Icons.Default.CheckCircle, contentDescription = strings.correctBadge)
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = strings.correctBadge,
+                            tint = optionForeground
+                        )
                     } else if (submitted && isSelected) {
                         Spacer(modifier = Modifier.width(8.dp))
-                        Icon(imageVector = Icons.Default.ErrorOutline, contentDescription = strings.wrongBadge)
+                        Icon(
+                            imageVector = Icons.Default.ErrorOutline,
+                            contentDescription = strings.wrongBadge,
+                            tint = optionForeground
+                        )
                     }
                 }
             }
