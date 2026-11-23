@@ -270,6 +270,7 @@ fun IstqbAppRoot(
         IntroSplashScreen(
             strings = s,
             isDarkTheme = viewModel.isDarkTheme,
+            isReadingMode = viewModel.isReadingMode && viewModel.displayMode != AppDisplayMode.EINK,
             onContinue = { viewModel.showIntroScreen = false }
         )
         return
@@ -288,16 +289,31 @@ fun IstqbAppRoot(
     val readingBackground = Color(0xFFF5E9C9)
     val readingText = Color(0xFF35291C)
     val readingSurface = Color(0xFFEBDDB9)
-    val backgroundColor = if (viewModel.isReadingMode) {
-        readingBackground
+    // A single reading palette for every screen, including navigation and settings.
+    // E-Ink remains an independent black-and-white mode.
+    val isReadingContent = viewModel.isReadingMode && !isEInk
+    val appColors = if (isReadingContent) {
+        MaterialTheme.colorScheme.copy(
+            background = readingBackground,
+            onBackground = readingText,
+            surface = readingSurface,
+            onSurface = readingText,
+            surfaceVariant = readingSurface,
+            onSurfaceVariant = readingText,
+            primary = readingText,
+            onPrimary = readingBackground,
+            primaryContainer = Color(0xFFD9C393),
+            onPrimaryContainer = readingText,
+            secondary = readingText,
+            onSecondary = readingBackground,
+            secondaryContainer = Color(0xFFE2D1AC),
+            onSecondaryContainer = readingText,
+            outline = Color(0xFF8C785C),
+            outlineVariant = Color(0xFFBBA887),
+            surfaceTint = readingText
+        )
     } else {
-        MaterialTheme.colorScheme.background
-    }
-
-    val textColor = if (viewModel.isReadingMode) {
-        readingText
-    } else {
-        MaterialTheme.colorScheme.onBackground
+        MaterialTheme.colorScheme
     }
 
     var recordTopicAnswersToStats by remember { mutableStateOf(true) }
@@ -333,11 +349,15 @@ fun IstqbAppRoot(
         }
     }
 
+    MaterialTheme(colorScheme = appColors) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         gesturesEnabled = currentRoute == ScreenRoute.HOME,
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(
+                drawerContainerColor = if (isReadingContent) readingSurface else MaterialTheme.colorScheme.surface,
+                drawerContentColor = if (isReadingContent) readingText else MaterialTheme.colorScheme.onSurface
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -533,9 +553,7 @@ fun IstqbAppRoot(
             containerColor = when {
                 isEInk -> Color(0xFFF0F0F0)
 
-                viewModel.isReadingMode &&
-                        currentRoute == ScreenRoute.MODULE_DETAIL ->
-                    readingBackground
+                isReadingContent -> readingBackground
 
                 else -> MaterialTheme.colorScheme.background
             },
@@ -569,33 +587,25 @@ fun IstqbAppRoot(
 
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = if (
-                            viewModel.isReadingMode &&
-                            currentRoute == ScreenRoute.MODULE_DETAIL &&
-                            !isEInk
+                            isReadingContent
                         ) readingBackground
                         else if (isEInk) Color(0xFFF0F0F0)
                         else MaterialTheme.colorScheme.surface,
 
                         scrolledContainerColor = if (
-                            viewModel.isReadingMode &&
-                            currentRoute == ScreenRoute.MODULE_DETAIL &&
-                            !isEInk
+                            isReadingContent
                         ) readingBackground
                         else if (isEInk) Color(0xFFF0F0F0)
                         else MaterialTheme.colorScheme.surface,
 
                         titleContentColor = if (
-                            viewModel.isReadingMode &&
-                            currentRoute == ScreenRoute.MODULE_DETAIL &&
-                            !isEInk
+                            isReadingContent
                         ) readingText
                         else if (isEInk) Color.Black
                         else MaterialTheme.colorScheme.onSurface ,
 
                         navigationIconContentColor = if (
-                            viewModel.isReadingMode &&
-                            currentRoute == ScreenRoute.MODULE_DETAIL &&
-                            !isEInk
+                            isReadingContent
                         ) readingText
                         else if (isEInk) Color.Black
                         else MaterialTheme.colorScheme.onSurface
@@ -641,19 +651,6 @@ fun IstqbAppRoot(
                         val module = viewModel.selectedModule
                         if (module != null) {
 
-                            val moduleColors = if (viewModel.isReadingMode && !isEInk) {
-                                MaterialTheme.colorScheme.copy(
-                                    background = readingBackground,
-                                    onBackground = readingText,
-                                    surface = readingBackground,
-                                    onSurface = readingText,
-                                    surfaceVariant = readingSurface,
-                                    onSurfaceVariant = readingText
-                                )
-                            } else {
-                                MaterialTheme.colorScheme
-                            }
-                            MaterialTheme(colorScheme = moduleColors) {
                             ModuleDetailScreen(
                                 strings = s,
                                 module = module,
@@ -673,7 +670,7 @@ fun IstqbAppRoot(
                                 isTablet = isTablet,
                                 onStartPractice = { viewModel.startSinglePracticeQuestion(module.practiceQuestionId) },
                                 onStartChapterTest = { viewModel.startChapterTest(module.chapter) }
-                            )}
+                            )
                         } else {
                             BookPlaceholderScreen(
                                 strings = s,
@@ -755,12 +752,12 @@ fun IstqbAppRoot(
 
                     ScreenRoute.QUIZ_RUNNER -> {
                         QuizRunnerScreen(
-                            strings = s,
-                            viewModel = viewModel,
-                            isEInk = isEInk,
-                            isTablet = isTablet,
-                            onFinishToMenu = { viewModel.currentRoute = ScreenRoute.HOME }
-                        )
+                                strings = s,
+                                viewModel = viewModel,
+                                isEInk = isEInk,
+                                isTablet = isTablet,
+                                onFinishToMenu = { viewModel.currentRoute = ScreenRoute.HOME }
+                            )
                     }
 
                     ScreenRoute.STATISTICS -> {
@@ -778,12 +775,14 @@ fun IstqbAppRoot(
             }
         }
     }
+    } // MaterialTheme: global reading palette
 }
 
 @Composable
 private fun IntroSplashScreen(
     strings: UiStrings,
     isDarkTheme: Boolean,
+    isReadingMode: Boolean,
     onContinue: () -> Unit
 ) {
     LaunchedEffect(Unit) {
@@ -791,8 +790,16 @@ private fun IntroSplashScreen(
         onContinue()
     }
 
-    val bg = if (isDarkTheme) Color(0xFF101318) else MaterialTheme.colorScheme.background
-    val fg = if (isDarkTheme) Color.White else MaterialTheme.colorScheme.onBackground
+    val bg = when {
+        isReadingMode -> Color(0xFFF5E9C9)
+        isDarkTheme -> Color(0xFF101318)
+        else -> MaterialTheme.colorScheme.background
+    }
+    val fg = when {
+        isReadingMode -> Color(0xFF35291C)
+        isDarkTheme -> Color.White
+        else -> MaterialTheme.colorScheme.onBackground
+    }
 
     Box(
         modifier = Modifier
@@ -1760,6 +1767,7 @@ private fun QuizRunnerScreen(
     val question = questions[viewModel.currentQuestionIndex]
     val selected = viewModel.selectedOptionIndex
     val submitted = viewModel.isAnswerSubmitted
+    val isReadingMode = viewModel.isReadingMode && !isEInk
 
     Column(
         modifier = Modifier
@@ -1799,8 +1807,15 @@ private fun QuizRunnerScreen(
             }
         }
         if (viewModel.isExamMode && question.allCorrectIndices.size > 1) {
-            Text(if (strings.isEn) "Select ${question.allCorrectIndices.size} answers"
-                else "Выбери ${question.allCorrectIndices.size} варианта")
+            val required = question.allCorrectIndices.size
+            val chosen = viewModel.selectedOptionIndices.size
+            Text(
+                text = if (strings.isEn)
+                    "Select $required answers • Selected: $chosen / $required"
+                else "Выбери $required варианта • Выбрано: $chosen из $required",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold
+            )
         }
 
         question.options.forEachIndexed { index, optionText ->
@@ -1808,11 +1823,23 @@ private fun QuizRunnerScreen(
                 index in viewModel.selectedOptionIndices else selected == index
             val isCorrectOption = index in question.allCorrectIndices
 
+            // Before submission, chosen options must remain unmistakable in every mode.
             val containerColor = when {
+                !submitted && isSelected -> when {
+                    isEInk -> Color(0xFFD4D4D4)
+                    isReadingMode -> Color(0xFFD9C393)
+                    else -> MaterialTheme.colorScheme.primaryContainer
+                }
                 !submitted -> if (isEInk) Color.White else MaterialTheme.colorScheme.surface
                 isCorrectOption -> if (isEInk) Color(0xFFE0E0E0) else Color(0xFFDFF5E6)
                 isSelected -> if (isEInk) Color(0xFFCCCCCC) else Color(0xFFFDE2E1)
                 else -> if (isEInk) Color.White else MaterialTheme.colorScheme.surface
+            }
+            val optionBorderColor = when {
+                isEInk -> Color.Black
+                isSelected && isReadingMode -> Color(0xFF35291C)
+                isSelected -> MaterialTheme.colorScheme.primary
+                else -> MaterialTheme.colorScheme.outline
             }
 
             Surface(
@@ -1825,8 +1852,8 @@ private fun QuizRunnerScreen(
                 shape = if (isEInk) RectangleShape else MaterialTheme.shapes.medium,
                 color = containerColor,
                 border = BorderStroke(
-                    width = if (isEInk || isSelected) 2.dp else 1.dp,
-                    color = if (isEInk) Color.Black else MaterialTheme.colorScheme.outline
+                    width = if (isSelected) 3.dp else if (isEInk) 2.dp else 1.dp,
+                    color = optionBorderColor
                 )
             ) {
                 Row(
@@ -1842,7 +1869,18 @@ private fun QuizRunnerScreen(
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f)
                     )
-                    if (submitted && isCorrectOption) {
+                    if (!submitted && isSelected) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = if (strings.isEn) "Selected" else "Выбрано",
+                            tint = when {
+                                isEInk -> Color.Black
+                                isReadingMode -> Color(0xFF35291C)
+                                else -> MaterialTheme.colorScheme.onPrimaryContainer
+                            }
+                        )
+                    } else if (submitted && isCorrectOption) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(imageVector = Icons.Default.CheckCircle, contentDescription = strings.correctBadge)
                     } else if (submitted && isSelected) {
