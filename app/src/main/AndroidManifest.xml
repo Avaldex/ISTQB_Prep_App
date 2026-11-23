@@ -5,7 +5,9 @@
         android:allowBackup="true"
         android:label="ISTQB Preparation"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ISTQBPrepApp">
+        android:theme="@style/Theme.ISTQBPrepApp"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round">
         <activity
             android:name=".MainActivity"
             android:exported="true"

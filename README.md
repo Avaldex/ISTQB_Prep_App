@@ -121,3 +121,41 @@ ISTQB and CTFL names and related third-party study materials belong to their res
 *Learn. Practise. Review. Improve.*
 
 **Good luck with your CTFL preparation!**
+
+<!-- ISTQB_APP_UPDATE_2026_11_BEGIN -->
+## Recent updates — November 2026
+
+**Adaptive Android UI and foldable readiness**
+
+- Added `FoldAwareViewport` with AndroidX WindowManager `FoldingFeature` handling. Where a separating hinge is reported, the UI is laid out inside the larger usable pane instead of drawing through the hinge.
+- Wide-window spacing is enabled at approximately **600 dp** of usable pane width; the app also supports portrait, landscape and Android multi-window layouts.
+- Added five Jetpack Compose previews for **320 dp, 600 dp and 840 dp** UI widths, covering the dashboard and exam-selection screens.
+- Added unit tests for fold-pane calculations and an Android UI test for the study screen.
+- Added a custom **red-and-gold launcher icon** (gold laurel branches, graduation cap and the words "ISTQB CTFL Preparation") with adaptive, round and legacy variants.
+
+**Validation performed (23 November 2026)**
+
+| Check | Result |
+| --- | --- |
+| `:app:assembleDebug` | Passed |
+| `:app:testDebugUnitTest` | Passed (3 tests) |
+| `:app:lintDebug` on JDK 21 | Completed: 0 errors, 10 warnings (mainly dependency update notices and a launcher-icon warning from before this icon was added) |
+| Physical Xiaomi: portrait / landscape | Exam question, selected option and running timer preserved during rotation |
+| Physical Xiaomi: split-screen | Displayed correctly in tested scenarios; exam navigation and scrolling accessible |
+| Compose previews 320 / 600 / 840 dp | Dashboard and exam selection rendered; no obvious overlaps in inspected previews |
+| Real foldable hinge and tablet exam flow | **Not yet tested on physical devices** |
+
+**Build and run**
+
+Open the project in Android Studio and run `app` on a connected Android device. In the project terminal:
+
+```powershell
+.\gradlew.bat :app:assembleDebug
+.\gradlew.bat :app:testDebugUnitTest
+.\gradlew.bat :app:lintDebug
+```
+
+If Lint fails with a `JavaVersion.parse` error under JDK 25, use **JDK 21** to run Gradle/Lint in your terminal. The Gradle toolchain's Kotlin/JVM target remains Java 17.
+
+**Independence notice:** This is an independent ISTQB CTFL study application. It is **not affiliated with, sponsored by, or endorsed by ISTQB®**. ISTQB is a trademark of its respective owner. Verify the licensing/attribution requirements of any official sample materials before public distribution.
+<!-- ISTQB_APP_UPDATE_2026_11_END -->
