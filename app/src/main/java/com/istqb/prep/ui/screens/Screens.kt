@@ -13,14 +13,17 @@ import android.net.Uri
 import android.content.ActivityNotFoundException
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -65,6 +68,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -74,7 +78,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.asImageBitmap
 import android.graphics.BitmapFactory
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -107,7 +110,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.shape.RoundedCornerShape
 
 
-private data class UiStrings(
+internal data class UiStrings(
     val isEn: Boolean,
     val appTitle: String,
     val preparationSubtitle: String,
@@ -155,7 +158,7 @@ private data class UiStrings(
     val mistakesReview: (Int) -> String
 )
 
-private fun stringsFor(lang: AppLanguage): UiStrings = when (lang) {
+internal fun stringsFor(lang: AppLanguage): UiStrings = when (lang) {
     AppLanguage.EN -> UiStrings(
         isEn = true,
         appTitle = "ISTQB",
@@ -282,7 +285,7 @@ fun IstqbAppRoot(
     }
     // The welcome guide is decided once per app launch. Turning the setting ON
     // in the drawer must not unexpectedly reopen the guide mid-session.
-    var introVisible by remember {
+    var introVisible by rememberSaveable {
         mutableStateOf(viewModel.showIntroScreen && showIntroOnStartup)
     }
 
@@ -340,9 +343,10 @@ fun IstqbAppRoot(
         MaterialTheme.colorScheme
     }
 
-    var recordTopicAnswersToStats by remember { mutableStateOf(true) }
+    var recordTopicAnswersToStats by rememberSaveable { mutableStateOf(true) }
 
-    val _statsTick = viewModel.statsVersion
+    @Suppress("UNUSED_VARIABLE")
+    val statsTick = viewModel.statsVersion
     val wrongIds = viewModel.getWrongQuestionIds()
     val correctIds = viewModel.getCorrectQuestionIds()
     val totalAttempted = wrongIds.size + correctIds.size
@@ -669,7 +673,9 @@ fun IstqbAppRoot(
                 TopAppBar(title = {
                         Text(
                             text = topTitle,
+                            modifier = Modifier.horizontalScroll(key(topTitle) { rememberScrollState() }),
                             maxLines = 1,
+                            softWrap = false,
                             fontWeight = FontWeight.SemiBold
                         )
                     },
@@ -971,6 +977,7 @@ private fun IntroSplashScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(background)
+            .safeDrawingPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -1331,9 +1338,11 @@ private fun ModuleListScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Text(
-                        text = "Topic Progress: %.1f%%".format(
-                            topicProgress.progressPercent
-                        ),
+                        text = if (strings.isEn) {
+                            "Topic Progress: %.1f%%".format(Locale.US, topicProgress.progressPercent)
+                        } else {
+                            "Прогресс по теме: %.1f%%".format(Locale.getDefault(), topicProgress.progressPercent)
+                        },
                         style = MaterialTheme.typography.bodySmall
                     )
 
@@ -1374,7 +1383,7 @@ private fun ModuleListScreen(
 }
 
 @Composable
-private fun ModuleDetailScreen(
+internal fun ModuleDetailScreen(
     strings: UiStrings,
     module: StudyModule,
     allQuestions: List<Question>,
@@ -1391,7 +1400,7 @@ private fun ModuleDetailScreen(
     isTablet: Boolean,
     onStartPractice: () -> Unit,
     onStartChapterTest: () -> Unit
-) {
+) = key(module.id, module.language) {
 
 
 
@@ -1411,9 +1420,9 @@ private fun ModuleDetailScreen(
         primary + others
     }
 
-    var questionIndex by remember(module.id) { mutableStateOf(0) }
-    var selectedOption by remember(module.id) { mutableStateOf<Int?>(null) }
-    var isChecked by remember(module.id) { mutableStateOf(false) }
+    var questionIndex by rememberSaveable { mutableIntStateOf(0) }
+    var selectedOption by rememberSaveable { mutableStateOf<Int?>(null) }
+    var isChecked by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -1526,7 +1535,7 @@ private fun ModuleDetailScreen(
                 }
             }
 
-            var keywordsExpanded by remember(module.id) {
+            var keywordsExpanded by rememberSaveable {
                 mutableStateOf(false)
             }
 
@@ -1939,7 +1948,7 @@ private fun ExamTicketsScreen(
 }
 
 @Composable
-private fun PdfQuestionImage(assetPath: String) {
+internal fun PdfQuestionImage(assetPath: String) = key(assetPath) {
     val context = LocalContext.current
     val bitmap = remember(assetPath) {
         runCatching {
@@ -1947,19 +1956,23 @@ private fun PdfQuestionImage(assetPath: String) {
         }.getOrNull()
     }
     if (bitmap != null) {
-        var enlarged by remember(assetPath) { mutableStateOf(false) }
-        val screenWidth = LocalConfiguration.current.screenWidthDp
+        var enlarged by rememberSaveable { mutableStateOf(false) }
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             OutlinedButton(onClick = { enlarged = !enlarged }) {
                 Text(if (enlarged) "Zoom −" else "Zoom +")
             }
-            Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())) {
-                Image(
-                    bitmap = bitmap,
-                    contentDescription = null,
-                    modifier = Modifier.width(if (enlarged) 700.dp else (screenWidth - 56).coerceAtLeast(240).dp),
-                    contentScale = ContentScale.FillWidth
-                )
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val imageWidth = if (enlarged) this.maxWidth * 2f else this.maxWidth
+                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState(), enabled = enlarged)) {
+                    Image(
+                        bitmap = bitmap,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .width(imageWidth)
+                            .aspectRatio(bitmap.width.toFloat() / bitmap.height),
+                        contentScale = ContentScale.Fit
+                    )
+                }
             }
         }
     } else {
@@ -1977,9 +1990,8 @@ private fun QuizRunnerScreen(
 ) {
     val horizontalPad = if (isTablet) 28.dp else 16.dp
     val questions = viewModel.quizQuestions
-    val questionScroll = rememberScrollState()
-    LaunchedEffect(viewModel.quizTitle, viewModel.currentQuestionIndex) {
-        questionScroll.scrollTo(0)
+    val questionScroll = key(viewModel.quizTitle, viewModel.currentQuestionIndex) {
+        rememberScrollState()
     }
     var secondsLeft by remember(viewModel.quizTitle, viewModel.examDeadlineElapsedMs) {
         mutableIntStateOf(if (viewModel.isExamMode) viewModel.timeRemainingSeconds() else 0)
@@ -2348,7 +2360,7 @@ private fun StatisticsScreen(
         item {
             StyledCard(isEInk = isEInk) {
                 Text(
-                    text = "Overall Syllabus Progress",
+                    text = if (strings.isEn) "Overall Syllabus Progress" else "Общий прогресс по Силлабусу",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -2356,9 +2368,11 @@ private fun StatisticsScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "Progress: %.1f%%".format(
-                        overallProgress.progressPercent
-                    )
+                    text = if (strings.isEn) {
+                        "Progress: %.1f%%".format(Locale.US, overallProgress.progressPercent)
+                    } else {
+                        "Прогресс: %.1f%%".format(Locale.getDefault(), overallProgress.progressPercent)
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -2387,17 +2401,27 @@ private fun StatisticsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Answered: ${overallProgress.answered} / ${overallProgress.total}"
+                    text = if (strings.isEn) {
+                        "Answered: ${overallProgress.answered} / ${overallProgress.total}"
+                    } else {
+                        "Отвечено: ${overallProgress.answered} из ${overallProgress.total}"
+                    }
                 )
 
                 Text(
-                    text = "Mastery: %.1f%%".format(
-                        overallProgress.masteryPercent
-                    )
+                    text = if (strings.isEn) {
+                        "Mastery: %.1f%%".format(Locale.US, overallProgress.masteryPercent)
+                    } else {
+                        "Освоено: %.1f%%".format(Locale.getDefault(), overallProgress.masteryPercent)
+                    }
                 )
 
                 Text(
-                    text = "Correct: ${overallProgress.correct}  •  Mistakes: ${overallProgress.wrong}"
+                    text = if (strings.isEn) {
+                        "Correct: ${overallProgress.correct}  •  Mistakes: ${overallProgress.wrong}"
+                    } else {
+                        "Верно: ${overallProgress.correct}  •  Ошибок: ${overallProgress.wrong}"
+                    }
                 )
             }
         }
@@ -2468,6 +2492,7 @@ private fun BookPlaceholderScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(if (isTablet) 24.dp else 16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
@@ -2532,3 +2557,82 @@ private fun StyledCard(
         }
     }
 }
+
+// BEGIN ISTQB ADAPTIVE PREVIEWS (test-only)
+// These @Preview functions are never called by the application.
+// They render existing HomeScreen and ExamTicketsScreen with static data.
+@androidx.compose.ui.tooling.preview.Preview(
+    name = "Phone narrow - 320dp", widthDp = 320, heightDp = 720, showBackground = true
+)
+@Composable
+private fun IstqbPreviewPhone320() {
+    IstqbPreviewHome(isTablet = false)
+}
+
+@androidx.compose.ui.tooling.preview.Preview(
+    name = "Small tablet - 600dp", widthDp = 600, heightDp = 960, showBackground = true
+)
+@Composable
+private fun IstqbPreviewTablet600() {
+    IstqbPreviewHome(isTablet = true)
+}
+
+@androidx.compose.ui.tooling.preview.Preview(
+    name = "Large tablet - 840dp", widthDp = 840, heightDp = 1100, showBackground = true
+)
+@Composable
+private fun IstqbPreviewTablet840() {
+    IstqbPreviewHome(isTablet = true)
+}
+
+@Composable
+private fun IstqbPreviewHome(isTablet: Boolean) {
+    MaterialTheme {
+        HomeScreen(
+            strings = stringsFor(AppLanguage.EN),
+            isEInk = false,
+            isTablet = isTablet,
+            correctCount = 24,
+            mistakesCount = 8,
+            accuracyPercent = 75,
+            onOpenStats = {},
+            onOpenSyllabusLearning = {},
+            onOpenSyllabusChapterTests = {},
+            onOpenExamMode = {}
+        )
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(
+    name = "Exam list - 320dp", widthDp = 320, heightDp = 720, showBackground = true
+)
+@Composable
+private fun IstqbPreviewExamList320() {
+    IstqbPreviewExamList(isTablet = false)
+}
+
+@androidx.compose.ui.tooling.preview.Preview(
+    name = "Exam list - tablet 840dp", widthDp = 840, heightDp = 1100, showBackground = true
+)
+@Composable
+private fun IstqbPreviewExamList840() {
+    IstqbPreviewExamList(isTablet = true)
+}
+
+@Composable
+private fun IstqbPreviewExamList(isTablet: Boolean) {
+    MaterialTheme {
+        ExamTicketsScreen(
+            strings = stringsFor(AppLanguage.EN),
+            tickets = listOf(1, 2, 3),
+            isEInk = false,
+            isTablet = isTablet,
+            onStartRandomExam = {},
+            onStartTicket = { _ -> },
+            officialReadyLetters = setOf("A", "B", "C", "D"),
+            officialError = null,
+            onStartOfficialExam = { _ -> }
+        )
+    }
+}
+// END ISTQB ADAPTIVE PREVIEWS (test-only)
