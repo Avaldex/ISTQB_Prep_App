@@ -620,7 +620,7 @@
       "kLevel": "K3",
       "chapter": 5,
       "originalQuestionImage": "official_samples/C/q31.png",
-      "questionText": "At the beginning of each iteration, the team estimates the amount of work (in person-days) they will need to complete during the iteration. Let E(n) be the estimated amount of work for iteration n, and let A(n) be the actual amount of work done in iteration n. From the third iteration, the team uses the following estimation model based on extrapolation: 𝐸(𝑛) = 3 ∗𝐴(𝑛−1) + 𝐴(𝑛−2) What is the estimated amount of work for iteration #5?",
+      "questionText": "At the beginning of each iteration, the team estimates the amount of work (in person-days) they will need to complete during the iteration. Let E(n) be the estimated amount of work for iteration n, and let A(n) be the actual amount of work done in iteration n. From the third iteration, the team uses the following estimation model based on extrapolation: E(n) = (3 × A(n−1) + A(n−2)) / 4.\n\nWhat is the estimated amount of work for iteration #5?",
       "optionTexts": [
         "10.5 person-days",
         "8.25 person-days",
