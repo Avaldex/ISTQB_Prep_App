@@ -1,5 +1,21 @@
 # ISTQB CTFL Preparation
 
+<!-- ISTQB_RELEASE_V2_BEGIN -->
+## Download APK — v2.0.0
+
+[**Download ISTQB CTFL Preparation v2.0.0**](https://github.com/Avaldex/ISTQB_Prep_App/releases/tag/v2.0.0)
+
+- App version: `2.0.0-ctfl-4.0.1`
+- Minimum Android: 7.0 (API 24)
+- Target Android: 15 (API 35)
+- Signed release APK
+- Successfully installed and tested on Xiaomi Redmi Note 12 Pro
+- Adaptive smartphone and tablet UI
+- Foldable layout support implemented and tested with previews
+
+This is an independent educational application, not an official ISTQB application.
+<!-- ISTQB_RELEASE_V2_END -->
+
 **An Android study app for the ISTQB Certified Tester Foundation Level (CTFL) v4.0.1 syllabus.**
 
 Built with **Kotlin** and **Jetpack Compose** by **Vladislav Bugaev**.
@@ -57,7 +73,7 @@ The project focuses on a simple mobile experience, readable question layouts, cl
 1. Clone this repository after it has been published:
 
    ```bash
-   git clone https://github.com/Avaldex/ISTQB-CTFL-Preparation.git
+   git clone https://github.com/Avaldex/ISTQB_Prep_App.git
    ```
 
 2. Open the cloned project folder in **Android Studio**.
@@ -65,7 +81,7 @@ The project focuses on a simple mobile experience, readable question layouts, cl
 4. Connect an Android device or start a compatible Android emulator.
 5. Run the `app` configuration.
 
-*Android SDK requirements and release APK information can be added once the publishing configuration is finalized.*
+
 
 ## Using the app
 
