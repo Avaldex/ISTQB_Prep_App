@@ -4,9 +4,9 @@
 
 [English README](README.md) · [Исходный код](https://github.com/Avaldex/ISTQB_Prep_App) · [Все релизы](https://github.com/Avaldex/ISTQB_Prep_App/releases)
 
-## Скачать APK — v2.0.0
+## Скачать APK — v2.0.1
 
-**[Скачать ISTQB CTFL Preparation v2.0.0](https://github.com/Avaldex/ISTQB_Prep_App/releases/tag/v2.0.0)**
+**[Скачать ISTQB CTFL Preparation v2.0.1](https://github.com/Avaldex/ISTQB_Prep_App/releases/tag/v2.0.1)**
 
 - Версия приложения: `2.0.0-ctfl-4.0.1` (versionCode `2`)
 - Минимальная версия: Android 7.0 (API 24)

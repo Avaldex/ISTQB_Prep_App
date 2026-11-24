@@ -1,9 +1,9 @@
 # ISTQB CTFL Preparation
 
 <!-- ISTQB_RELEASE_V2_BEGIN -->
-## Download APK — v2.0.0
+## Download APK — v2.0.1
 
-[**Download ISTQB CTFL Preparation v2.0.0**](https://github.com/Avaldex/ISTQB_Prep_App/releases/tag/v2.0.0)
+[**Download ISTQB CTFL Preparation v2.0.1**](https://github.com/Avaldex/ISTQB_Prep_App/releases/tag/v2.0.1)
 
 - App version: `2.0.0-ctfl-4.0.1`
 - Minimum Android: 7.0 (API 24)
