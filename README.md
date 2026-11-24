@@ -175,3 +175,67 @@ If Lint fails with a `JavaVersion.parse` error under JDK 25, use **JDK 21** to r
 
 **Independence notice:** This is an independent ISTQB CTFL study application. It is **not affiliated with, sponsored by, or endorsed by ISTQB®**. ISTQB is a trademark of its respective owner. Verify the licensing/attribution requirements of any official sample materials before public distribution.
 <!-- ISTQB_APP_UPDATE_2026_11_END -->
+
+<!-- ISTQB_GALLERY_BEGIN -->
+## Screenshots
+Real application screenshots from Android, including four display modes. Click any image on GitHub to enlarge it.
+
+### Getting started
+<p align="center">
+  <img src="docs/screenshots/welcome/01_welcome_light.png" alt="Welcome guide" width="218" />
+  <img src="docs/screenshots/home/01_home_light.png" alt="Home — Light mode" width="218" />
+  <img src="docs/screenshots/learning/01_syllabus_topics_light.png" alt="Syllabus topic list" width="218" />
+</p>
+
+### Learning and chapter tests
+<p align="center">
+  <img src="docs/screenshots/learning/02_topic_theory_light.png" alt="Theory and keywords" width="218" />
+  <img src="docs/screenshots/learning/03_answer_selected_light.png" alt="Answer selection — Light" width="218" />
+  <img src="docs/screenshots/tests/02_chapter_question_dark.png" alt="Chapter test question" width="218" />
+</p>
+
+### Exam mode and progress
+<p align="center">
+  <img src="docs/screenshots/exams/01_exam_menu_light.png" alt="Exam selection, sample exams A–D" width="204" />
+  <img src="docs/screenshots/exams/02_official_sample_a_eink.png" alt="Sample Exam A with timer" width="204" />
+  <img src="docs/screenshots/statistics/01_statistics_light.png" alt="Learning statistics" width="204" />
+  <img src="docs/screenshots/statistics/02_mistakes_review_light.png" alt="Mistakes review" width="204" />
+</p>
+
+### Selected answer in four display modes
+<p align="center">
+  <img src="docs/screenshots/learning/03_answer_selected_light.png" alt="Answer selection — Light" width="204" />
+  <img src="docs/screenshots/learning/04_answer_selected_dark.png" alt="Answer selection — Dark" width="204" />
+  <img src="docs/screenshots/learning/05_answer_selected_reading.png" alt="Answer selection — Reading" width="204" />
+  <img src="docs/screenshots/learning/06_answer_selected_eink.png" alt="Answer selection — E-Ink" width="204" />
+</p>
+
+<details>
+<summary>More screenshots: menus, settings, E-Ink font size and answer feedback</summary>
+
+#### Home screens — Light / Dark / Reading / E-Ink
+<p align="center">
+  <img src="docs/screenshots/home/01_home_light.png" alt="Home — Light mode" width="204" />
+  <img src="docs/screenshots/home/02_home_dark.png" alt="Home — Dark mode" width="204" />
+  <img src="docs/screenshots/home/03_home_reading.png" alt="Home — Reading mode" width="204" />
+  <img src="docs/screenshots/home/04_home_eink.png" alt="Home — E-Ink mode" width="204" />
+</p>
+
+#### Settings
+<p align="center">
+  <img src="docs/screenshots/settings/01_settings_light.png" alt="Settings — Light" width="204" />
+  <img src="docs/screenshots/settings/02_settings_dark.png" alt="Settings — Dark" width="204" />
+  <img src="docs/screenshots/settings/03_settings_reading.png" alt="Settings — Reading" width="204" />
+  <img src="docs/screenshots/settings/04_settings_eink.png" alt="Settings — E-Ink" width="204" />
+</p>
+
+#### Other features
+<p align="center">
+  <img src="docs/screenshots/tests/01_chapter_list_dark.png" alt="Chapter tests list" width="204" />
+  <img src="docs/screenshots/learning/07_answer_result_dark.png" alt="Answer feedback — Dark" width="204" />
+  <img src="docs/screenshots/learning/08_eink_font_19sp.png" alt="E-Ink text size 19 sp" width="204" />
+  <img src="docs/screenshots/learning/09_eink_font_24sp.png" alt="E-Ink text size 24 sp" width="204" />
+</p>
+
+</details>
+<!-- ISTQB_GALLERY_END -->
