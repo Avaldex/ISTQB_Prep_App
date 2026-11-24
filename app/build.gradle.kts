@@ -12,8 +12,8 @@ android {
         applicationId = "com.istqb.prep"
         minSdk = 24
         targetSdk = 35
-        versionCode = 2
-        versionName = "2.0.0-ctfl-4.0.1"
+        versionCode = 3
+        versionName = "2.0.1-ctfl-4.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
