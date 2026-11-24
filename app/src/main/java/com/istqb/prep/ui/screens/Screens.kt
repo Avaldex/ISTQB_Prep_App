@@ -1624,7 +1624,15 @@ internal fun ModuleDetailScreen(
                     }
                     Switch(
                         checked = recordToStats,
-                        onCheckedChange = onToggleRecordToStats
+                        onCheckedChange = onToggleRecordToStats,
+                        // E-Ink: monochrome switch, like the existing intro toggle.
+                        colors = if (isEInk) SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = Color.Black,
+                            uncheckedThumbColor = Color.Black,
+                            uncheckedTrackColor = Color.White,
+                            uncheckedBorderColor = Color.Black
+                        ) else SwitchDefaults.colors()
                     )
                 }
             }
@@ -1656,7 +1664,28 @@ internal fun ModuleDetailScreen(
                     darkFeedback -> Color(0xFF682D39)
                     else -> Color(0xFFFDE2E1)
                 }
+                // Selection is neutral gray before checking, never green/red.
+                // A thick border and check icon make it readable without relying on color.
+                val selectedBackground = when {
+                    isEInk -> Color(0xFFD0D0D0)
+                    isReadingMode -> Color(0xFFD6D0C4)
+                    darkFeedback -> Color(0xFF4A4A50)
+                    else -> Color(0xFFD9DDE1)
+                }
+                val selectedForeground = when {
+                    isEInk -> Color.Black
+                    isReadingMode -> Color(0xFF35291C)
+                    darkFeedback -> Color.White
+                    else -> Color(0xFF202124)
+                }
+                val selectedBorder = when {
+                    isEInk -> Color.Black
+                    isReadingMode -> Color(0xFF35291C)
+                    darkFeedback -> Color.White
+                    else -> Color(0xFF42464A)
+                }
                 val containerColor = when {
+                    !isChecked && isSelected -> selectedBackground
                     !isChecked -> if (isEInk) Color.White else MaterialTheme.colorScheme.surface
                     isCorrectOption -> correctBackground
                     isSelected -> wrongBackground
@@ -1675,8 +1704,15 @@ internal fun ModuleDetailScreen(
                         darkFeedback -> Color(0xFFFFF5F5)
                         else -> Color(0xFF53242C)
                     }
+                    !isChecked && isSelected -> selectedForeground
                     isEInk -> Color.Black
                     else -> MaterialTheme.colorScheme.onSurface
+                }
+
+                val optionBorderColor = when {
+                    !isChecked && isSelected -> selectedBorder
+                    isEInk -> Color.Black
+                    else -> MaterialTheme.colorScheme.outline
                 }
 
                 Surface(
@@ -1687,8 +1723,8 @@ internal fun ModuleDetailScreen(
                     color = containerColor,
                     contentColor = optionForeground,
                     border = BorderStroke(
-                        width = if (isEInk || isSelected) 2.dp else 1.dp,
-                        color = if (isEInk) Color.Black else MaterialTheme.colorScheme.outline
+                        width = if (isSelected) 3.dp else if (isEInk) 2.dp else 1.dp,
+                        color = optionBorderColor
                     )
                 ) {
                     Row(
@@ -1703,7 +1739,14 @@ internal fun ModuleDetailScreen(
                             color = optionForeground,
                             modifier = Modifier.weight(1f)
                         )
-                        if (isChecked && isCorrectOption) {
+                        if (!isChecked && isSelected) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = if (strings.isEn) "Selected" else "Выбрано",
+                                tint = optionForeground
+                            )
+                        } else if (isChecked && isCorrectOption) {
                             Spacer(modifier = Modifier.width(8.dp))
                             Icon(
                                 imageVector = Icons.Default.CheckCircle,
